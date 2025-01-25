@@ -1,0 +1,12 @@
+/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/libmigration-5a6a30ba4e8a2a3d.rmeta: src/lib.rs src/m20250125_085443_create_users_table.rs src/m20250125_085421_create_images_table.rs src/m20250125_085500_create_contents_table.rs src/m20250125_093836_create_pages_table.rs src/m20250125_083543_create_roles_table.rs
+
+/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/libmigration-5a6a30ba4e8a2a3d.rlib: src/lib.rs src/m20250125_085443_create_users_table.rs src/m20250125_085421_create_images_table.rs src/m20250125_085500_create_contents_table.rs src/m20250125_093836_create_pages_table.rs src/m20250125_083543_create_roles_table.rs
+
+/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/migration-5a6a30ba4e8a2a3d.d: src/lib.rs src/m20250125_085443_create_users_table.rs src/m20250125_085421_create_images_table.rs src/m20250125_085500_create_contents_table.rs src/m20250125_093836_create_pages_table.rs src/m20250125_083543_create_roles_table.rs
+
+src/lib.rs:
+src/m20250125_085443_create_users_table.rs:
+src/m20250125_085421_create_images_table.rs:
+src/m20250125_085500_create_contents_table.rs:
+src/m20250125_093836_create_pages_table.rs:
+src/m20250125_083543_create_roles_table.rs:

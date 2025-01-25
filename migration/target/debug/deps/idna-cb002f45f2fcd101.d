@@ -1,0 +1,10 @@
+/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/libidna-cb002f45f2fcd101.rmeta: /Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/lib.rs /Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/deprecated.rs /Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/punycode.rs /Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/uts46.rs
+
+/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/libidna-cb002f45f2fcd101.rlib: /Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/lib.rs /Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/deprecated.rs /Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/punycode.rs /Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/uts46.rs
+
+/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/idna-cb002f45f2fcd101.d: /Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/lib.rs /Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/deprecated.rs /Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/punycode.rs /Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/uts46.rs
+
+/Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/lib.rs:
+/Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/deprecated.rs:
+/Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/punycode.rs:
+/Users/jackmoloneyobrien/.cargo/registry/src/index.crates.io-6f17d22bba15001f/idna-1.0.3/src/uts46.rs:
