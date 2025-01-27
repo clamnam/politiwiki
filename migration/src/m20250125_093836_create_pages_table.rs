@@ -18,7 +18,7 @@
                                 .auto_increment()
                                 .primary_key(),
                         )
-                        .col(ColumnDef::new(Pages::Title).string())
+                        .col(ColumnDef::new(Pages::Title).string().not_null())
                         .col(ColumnDef::new(Pages::ContentId).integer())
                         .col(ColumnDef::new(Pages::CreatedAt).date_time())
                         .col(ColumnDef::new(Pages::UpdatedAt).date_time())

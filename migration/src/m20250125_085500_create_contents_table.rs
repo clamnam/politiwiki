@@ -24,7 +24,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Content::ImagesId).integer())
                     .col(ColumnDef::new(Content::CreatedById).integer())
                     .col(ColumnDef::new(Content::ModifiedById).integer())
-                    .col(ColumnDef::new(Content::Status).string())
+                    .col(ColumnDef::new(Content::Status).integer())
                     .col(ColumnDef::new(Content::OrderId).integer())
                     .col(ColumnDef::new(Content::IsHidden).boolean())
                     .col(ColumnDef::new(Content::IsDeleted).boolean())

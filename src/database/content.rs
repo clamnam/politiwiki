@@ -14,7 +14,7 @@ pub struct Model {
     pub images_id: Option<i32>,
     pub created_by_id: Option<i32>,
     pub modified_by_id: Option<i32>,
-    pub status: Option<String>,
+    pub status: Option<i32>,
     pub order_id: Option<i32>,
     pub is_hidden: Option<bool>,
     pub is_deleted: Option<bool>,
