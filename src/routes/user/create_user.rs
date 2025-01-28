@@ -12,7 +12,7 @@ pub struct UserCreate {
     password: String,
 }
 
-pub async fn user_create(Extension(database): Extension<DatabaseConnection>,Json(request_user): Json<UserCreate>) {
+pub async fn create_user(Extension(database): Extension<DatabaseConnection>,Json(request_user): Json<UserCreate>) {
     let new_users = users::ActiveModel {
         email : Set(request_user.email),
         username:Set(request_user.username),
