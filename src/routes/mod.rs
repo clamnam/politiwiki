@@ -4,7 +4,7 @@ mod user;
 mod page;
 
 //user
-use user::create_user::create_user;
+use user::user::{login, register};
 
 //content
 use content::get_content::get_content;
@@ -18,7 +18,9 @@ pub fn create_routes(database: DatabaseConnection) -> Router<Body> {
     Router::new()
         .route("/content", get(get_content))
         // .route("/content", post(content_post))
-        .route("/user", post(create_user))
+        .route("/user/register", post(register))
+        .route("/user/login", post(login))
+
         //page
         .route("/page", post(create_page))
         .route("/page", get(get_all_page))

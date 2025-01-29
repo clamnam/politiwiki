@@ -13,6 +13,7 @@ pub struct Model {
     pub role_id: Option<i32>,
     pub images_id: Option<i32>,
     pub created_at: Option<DateTime>,
+    pub token: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
