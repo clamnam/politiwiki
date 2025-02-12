@@ -7,6 +7,7 @@ pub struct ResponsePage {
     title: String,
     created_at: String,
     updated_at: String,
+    
 }
 
 #[derive(serde::Deserialize)]
@@ -20,7 +21,7 @@ pub async fn get_single_page(Path(page_id): Path<i32>, Extension(database): Exte
         Ok(Json(ResponsePage {
             id: page.id,
             title: page.title,
-            created_at: page.created_at.unwrap().to_string(),
+            created_at: page.created_at.unwrap_or_default().to_string(),
             updated_at: page.updated_at.unwrap_or_default().to_string(),
         }))
     } else {
@@ -54,7 +55,7 @@ pub async fn get_all_page(Extension(database): Extension<DatabaseConnection>, Qu
     .map(|db_page| ResponsePage {
         id: db_page.id,
         title: db_page.title,
-        created_at: db_page.created_at.unwrap().to_string(),
+        created_at: db_page.created_at.unwrap_or_default().to_string(),
         updated_at: db_page.updated_at.unwrap_or_default().to_string(),
     })
     .collect();

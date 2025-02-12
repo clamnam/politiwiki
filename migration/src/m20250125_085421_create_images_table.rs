@@ -17,7 +17,11 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Images::ImageUrl).string())
+                    .col(
+                        ColumnDef::new(Images::ImageUrl)
+                            .string()
+                            .not_null()
+                    )
                     .col(ColumnDef::new(Images::CreatedAt).date_time())
                     .to_owned(),
             )
