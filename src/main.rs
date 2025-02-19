@@ -7,6 +7,11 @@ use dotenvy::dotenv;
 pub async fn main() {
     dotenv().ok();
     let database_uri = dotenv!("DATABASE_URL");
-    println!("{:?}", database_uri);
+    // remove this (for debugging )
+    tracing_subscriber::fmt()
+    .with_target(false)
+    .compact()
+    .init();
+    // println!("{:?}", database_uri);
     run(&database_uri).await;
 }

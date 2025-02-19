@@ -24,6 +24,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Content::ImagesId).integer())
                     .col(ColumnDef::new(Content::CreatedById).integer())
                     .col(ColumnDef::new(Content::ModifiedById).integer())
+                    .col(ColumnDef::new(Content::PageId).integer())
                     .col(ColumnDef::new(Content::Status).integer())
                     .col(ColumnDef::new(Content::OrderId).integer())
                     .col(ColumnDef::new(Content::IsHidden).boolean())
@@ -67,6 +68,17 @@ impl MigrationTrait for Migration {
             )
             .await?;
 
+        // page_id -> pages.id
+        manager
+            .create_foreign_key(
+                ForeignKeyCreateStatement::new()
+                    .name("fk_content_page")
+                    .from(Content::Table, Content::PageId)
+                    .to(Pages::Table, Pages::Id)
+                    .to_owned(),
+            )
+            .await?;
+
         Ok(())
     }
 
@@ -95,6 +107,8 @@ enum Content {
     CreatedById,
     #[sea_orm(iden = "modified_by_id")]
     ModifiedById,
+    #[sea_orm(iden = "page_id")]
+    PageId,
     #[sea_orm(iden = "status")]
     Status,
     #[sea_orm(iden = "order_id")]
@@ -119,6 +133,13 @@ enum User {
 #[derive(Iden)]
 enum Images {
     #[iden = "images"]
+    Table,
+    Id,
+}
+
+#[derive(Iden)]
+enum Pages {
+    #[iden = "pages"]
     Table,
     Id,
 }

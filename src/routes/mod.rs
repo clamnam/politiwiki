@@ -5,7 +5,10 @@ mod page;
 mod image;
 mod custom_middleware;
 
+    // remove this (for debugging )
 
+use tower_http::trace::{self, TraceLayer};
+use tracing::Level;
 //user
 use user::user::{login, register,logout};
 //content
@@ -47,6 +50,16 @@ pub fn create_routes(database: DatabaseConnection) -> Router<Body> {
         .route("/image/:id", get(get_single_image))
         .route("/image/:id", put(atomic_update_image))
         .route("/image/:id", patch(partial_update_image))
+       
 
         .layer(Extension(database))
+        // remove this (for debugging )
+
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(trace::DefaultMakeSpan::new()
+                    .level(Level::INFO))
+                .on_response(trace::DefaultOnResponse::new()
+                    .level(Level::INFO)),
+                )
 }

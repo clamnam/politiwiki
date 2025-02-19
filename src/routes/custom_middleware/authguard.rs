@@ -9,10 +9,12 @@ pub async fn authguard<T>(
         .ok_or(StatusCode::BAD_REQUEST)?
         .token()
         .to_owned();
+    
     let database = request
         .extensions()
         .get::<DatabaseConnection>()
         .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?;
+    
     let user = Users::find()
         .filter(users::Column::Token.eq(Some(token)))
         .one(database)
