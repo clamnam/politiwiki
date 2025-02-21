@@ -18,7 +18,7 @@ pub async fn partial_update_image(
 ) -> impl IntoResponse {
     let update_image = images::ActiveModel {
         id: Set(id),
-        image_url: Set(Some(request_image.image_url)),
+        image_url: Set(request_image.image_url),
         created_at: Set(request_image.created_at),
     };
 

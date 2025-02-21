@@ -19,7 +19,7 @@ pub async fn get_single_image(Path(image_id): Path<i32>, Extension(database): Ex
     if let Some(image) = image {
         Ok(Json(ResponsePage {
             id: image.id,
-            image_url: image.image_url.unwrap_or_default().to_string(),
+            image_url: image.image_url.to_string(),
             created_at: image.created_at.unwrap_or_default().to_string(),
         }))
     } else {
@@ -55,7 +55,7 @@ pub async fn get_all_image(
     .into_iter()
     .map(|db_image| ResponsePage {
         id: db_image.id,
-        image_url: db_image.image_url.unwrap_or_default(),
+        image_url: db_image.image_url,
         created_at: db_image.created_at.unwrap_or_default().to_string(),
     })
     .collect();

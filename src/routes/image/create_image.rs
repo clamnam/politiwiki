@@ -12,7 +12,7 @@ pub struct ImageCreate {
 
 pub async fn create_image(Extension(database): Extension<DatabaseConnection>,Json(request_image): Json<ImageCreate>) {
     let new_images = images::ActiveModel {
-        image_url: Set(Some(request_image.image_url)),
+        image_url: Set(request_image.image_url),
         created_at: Set(Some(Utc::now().naive_utc())),
         ..Default::default()
     };

@@ -12,7 +12,7 @@ use tracing::Level;
 //user
 use user::user::{login, register,logout};
 //content
-use content::{create_content::create_content, get_content::{get_all_content, get_single_content}};
+use content::{create_content::create_content, get_content::{get_all_content, get_single_content,get_content_by_page}};
 
 //page
 use page::{create_page::create_page, get_page::{get_all_page, get_single_page}, update_page::atomic_update_page,partial_update_page::partial_update_page};
@@ -30,6 +30,8 @@ pub fn create_routes(database: DatabaseConnection) -> Router<Body> {
 
         //content
         .route("/content/:id", get(get_single_content))
+        .route("/content/bypage/:id", get(get_content_by_page))
+
         .route("/content/", get(get_all_content))
 
         .route("/content", post(create_content))

@@ -1,6 +1,6 @@
 use axum::{extract::Path, http::StatusCode, Extension, Json};
-use sea_orm::{DatabaseConnection, EntityTrait};
-use crate::database::content::Entity as Contents;
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+use crate::{database::content::{self, Entity as Contents}, routes::page};
 #[derive(serde::Serialize)]
 pub struct ResponseContent {
     id: i32,
@@ -11,6 +11,7 @@ pub struct ResponseContent {
     created_by_id: Option<i32>,
     modified_by_id: Option<i32>,
     status: Option<i32>,
+    page_id: Option<i32>,
     order_id: Option<i32>,
     is_hidden: Option<bool>,
     is_deleted: Option<bool>,
@@ -33,6 +34,8 @@ pub async fn get_single_content(Path(content_id): Path<i32>, Extension(database)
             modified_by_id: content.modified_by_id,
             status: content.status,
             order_id: content.order_id,
+            page_id: content.page_id,
+
             is_hidden: content.is_hidden,
             is_deleted: content.is_deleted,
 
@@ -42,7 +45,31 @@ pub async fn get_single_content(Path(content_id): Path<i32>, Extension(database)
         Err(StatusCode::NOT_FOUND)
     }
 }
-
+pub async fn get_content_by_page(Path(page_id): Path<i32>, Extension(database): Extension<DatabaseConnection>)-> Result<Json<Vec<ResponseContent>>, StatusCode>{
+    let content = Contents::find()
+        .filter(crate::database::content::Column::PageId.eq(page_id))
+        .all(&database)
+        .await
+        .unwrap();
+    if !content.is_empty() {
+        Ok(Json(content.into_iter().map(|content| ResponseContent {
+            id: content.id,
+            title: content.title,
+            content_type: content.content_type,
+            content_body: content.content_body,
+            images_id: content.images_id,
+            created_by_id: content.created_by_id,
+            modified_by_id: content.modified_by_id,
+            page_id: content.page_id,
+            status: content.status,
+            order_id: content.order_id,
+            is_hidden: content.is_hidden,
+            is_deleted: content.is_deleted,
+        }).collect()))
+    } else {
+        Err(StatusCode::NOT_FOUND)
+    }
+}
 pub async fn get_all_content(
     Extension(database): Extension<DatabaseConnection>,
     // Query(query_params): Query<GetContentQueryParams>
@@ -79,6 +106,7 @@ pub async fn get_all_content(
         modified_by_id: Some(db_content.modified_by_id.unwrap_or_default()),
         status: Some(db_content.status.unwrap_or_default()),
         order_id: Some(db_content.order_id.unwrap_or_default()),
+        page_id: Some(db_content.page_id.unwrap_or_default()),
         is_hidden: Some(db_content.is_hidden.unwrap_or_default()),
         is_deleted: Some(db_content.is_deleted.unwrap_or_default()),
     })

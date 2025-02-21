@@ -14,6 +14,7 @@ pub struct Model {
     pub images_id: Option<i32>,
     pub created_by_id: Option<i32>,
     pub modified_by_id: Option<i32>,
+    pub page_id: Option<i32>,
     pub status: Option<i32>,
     pub order_id: Option<i32>,
     pub is_hidden: Option<bool>,
@@ -32,7 +33,13 @@ pub enum Relation {
         on_delete = "NoAction"
     )]
     Images,
-    #[sea_orm(has_many = "super::pages::Entity")]
+    #[sea_orm(
+        belongs_to = "super::pages::Entity",
+        from = "Column::PageId",
+        to = "super::pages::Column::Id",
+        on_update = "NoAction",
+        on_delete = "NoAction"
+    )]
     Pages,
     #[sea_orm(
         belongs_to = "super::users::Entity",

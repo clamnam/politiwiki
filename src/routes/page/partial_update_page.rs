@@ -10,7 +10,6 @@ use axum::response::IntoResponse;
 #[derive(serde::Deserialize)]
 pub struct RequestPage{
     pub title: String,
-    pub content_id: Option<i32>,
     pub created_at: Option<DateTime>,
 }
 pub async fn partial_update_page(
@@ -21,7 +20,6 @@ pub async fn partial_update_page(
     let update_page = pages::ActiveModel {
         id: Set(id),
         title: Set(request_page.title),
-        content_id: Set(request_page.content_id),
         created_at: Set(request_page.created_at),
         updated_at: Set(Some(Utc::now().naive_utc()))
     };

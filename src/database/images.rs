@@ -7,7 +7,7 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
-    pub image_url: Option<String>,
+    pub image_url: String,
     pub created_at: Option<DateTime>,
 }
 

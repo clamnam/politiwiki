@@ -8,20 +8,13 @@ pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
     pub title: String,
-    pub content_id: Option<i32>,
     pub created_at: Option<DateTime>,
     pub updated_at: Option<DateTime>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(
-        belongs_to = "super::content::Entity",
-        from = "Column::ContentId",
-        to = "super::content::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
-    )]
+    #[sea_orm(has_many = "super::content::Entity")]
     Content,
 }
 
