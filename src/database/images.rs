@@ -7,7 +7,8 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
-    pub image_url: String,
+    #[sea_orm(column_type = "VarBinary(StringLen::None)")]
+    pub image_data: Vec<u8>,
     pub created_at: Option<DateTime>,
 }
 

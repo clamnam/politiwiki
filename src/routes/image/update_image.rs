@@ -8,7 +8,7 @@ use axum::response::IntoResponse;
 
 #[derive(serde::Deserialize)]
 pub struct RequestImage{
-    pub image_url: String,
+    pub image_data: Vec<u8>,
     pub created_at: Option<DateTime>,
 }
 pub async fn atomic_update_image(
@@ -18,7 +18,7 @@ pub async fn atomic_update_image(
 ) -> impl IntoResponse {
     let update_image = images::ActiveModel {
         id: Set(id),
-        image_url: Set(request_image.image_url),
+        image_data: Set(request_image.image_data),
         created_at: Set(request_image.created_at),
     };
 

@@ -1,6 +1,6 @@
 use axum::{extract::Path, http::StatusCode, Extension, Json};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
-use crate::{database::content::{self, Entity as Contents}, routes::page};
+use crate::database::content::Entity as Contents;
 #[derive(serde::Serialize)]
 pub struct ResponseContent {
     id: i32,
@@ -24,6 +24,7 @@ pub struct ResponseContent {
 pub async fn get_single_content(Path(content_id): Path<i32>, Extension(database): Extension<DatabaseConnection>) -> Result<Json<ResponseContent>, StatusCode> {
     let content: Option<crate::database::content::Model> = Contents::find_by_id(content_id).one(&database).await.unwrap();
     if let Some(content) = content {
+
         Ok(Json(ResponseContent {
             id: content.id,
             title: content.title,

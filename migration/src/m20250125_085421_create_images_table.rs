@@ -18,9 +18,9 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(
-                        ColumnDef::new(Images::ImageUrl)
-                            .string()
-                            .not_null()
+                        ColumnDef::new(Images::ImageData)
+                            .binary()
+                            .not_null(),
                     )
                     .col(ColumnDef::new(Images::CreatedAt).date_time())
                     .to_owned(),
@@ -41,8 +41,8 @@ enum Images {
     Table,
     #[sea_orm(iden = "id")]
     Id,
-    #[sea_orm(iden = "image_url")]
-    ImageUrl,
+    #[sea_orm(iden = "image_data")]
+    ImageData,
     #[sea_orm(iden = "created_at")]
     CreatedAt,
 }
