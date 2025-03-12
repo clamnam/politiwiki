@@ -26,6 +26,15 @@ use sea_orm::DatabaseConnection;
 pub fn create_routes(database: DatabaseConnection) -> Router<Body> {
     Router::new()
         .route("/logout", post(logout))
+        
+        .route("/page", post(create_page))
+        .route("/content", post(create_content))
+        .route("/image", post(create_image))
+
+        .route("/page/:id", put(atomic_update_page))
+        .route("/page/:id", patch(partial_update_page))
+        .route("/image/:id", put(atomic_update_image))
+        .route("/image/:id", patch(partial_update_image))
         .route_layer(middleware::from_fn(authguard))
 
         //content
@@ -34,24 +43,19 @@ pub fn create_routes(database: DatabaseConnection) -> Router<Body> {
 
         .route("/content/", get(get_all_content))
 
-        .route("/content", post(create_content))
 
         //users
         .route("/register", post(register))
         .route("/login", post(login))
         //page 
-        .route("/page", post(create_page))
         .route("/page", get(get_all_page))
         .route("/page/:id", get(get_single_page))
-        .route("/page/:id", put(atomic_update_page))
-        .route("/page/:id", patch(partial_update_page))
+
 
         //image 
-        .route("/image", post(create_image))
         .route("/image", get(get_all_image))
         .route("/image/:id", get(get_single_image))
-        .route("/image/:id", put(atomic_update_image))
-        .route("/image/:id", patch(partial_update_image))
+
        
 
         .layer(Extension(database))

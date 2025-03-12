@@ -1,4 +1,5 @@
 
+use crate::utils::jwt::create_jwt;
 use axum::{headers::{authorization::Bearer, Authorization}, http::StatusCode, Extension, Json, TypedHeader};
 use chrono::Utc;
 
@@ -23,6 +24,7 @@ pub struct ResponseUser {
 
 
 pub async fn register(Extension(database): Extension<DatabaseConnection>,Json(request_user): Json<RequestUser>) -> Result<Json<ResponseUser>,StatusCode> {
+    let jwt = create_jwt()?;
     let new_role = roles::ActiveModel {
         title: Set(Some(5)),
         ..Default::default()
@@ -34,8 +36,8 @@ pub async fn register(Extension(database): Extension<DatabaseConnection>,Json(re
     let new_user = users::ActiveModel {
         email: Set(request_user.email.unwrap_or_default()),
         username:Set(request_user.username),
-        password:Set(request_user.password),
-        token: Set(Some("dslajkldsao9928913".to_owned())),
+        password:Set(hash_password(request_user.password)?),
+        token: Set(Some(jwt)),
         created_at: Set(Some(Utc::now().naive_utc())),
         role_id: Set(Some(new_role.id.unwrap())),
         ..Default::default()
@@ -52,7 +54,7 @@ pub async fn register(Extension(database): Extension<DatabaseConnection>,Json(re
     }))
 }
 pub async fn login(Json(request_user): Json<RequestUser>, Extension(database): Extension<DatabaseConnection>) -> Result<Json<ResponseUser>,StatusCode> {
-    
+
     let db_user = users::Entity::find()
         .filter(users::Column::Username.eq(request_user.username))
         .one(&database)
@@ -60,7 +62,10 @@ pub async fn login(Json(request_user): Json<RequestUser>, Extension(database): E
         .map_err(|_error| StatusCode::INTERNAL_SERVER_ERROR)?;
     
     if let Some(db_user)=db_user {
-        let new_token = "1231412412312".to_owned();
+        if !verify_password(request_user.password, &db_user.password)?{
+            return Err(StatusCode::UNAUTHORIZED);
+        }
+        let new_token = create_jwt()?;
         let mut user = db_user.into_active_model();
         user.token = Set(Some(new_token));
         let saved_user = user.save(&database)
@@ -94,4 +99,13 @@ user.token=Set(None);
 
 user.save(&database).await.map_err(|_error| StatusCode::INTERNAL_SERVER_ERROR)?;
 Ok(())
+}
+
+fn hash_password (password: String)->Result<String,StatusCode>{
+    bcrypt::hash(password,12)
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+}
+fn verify_password(password: String, hash:&str) ->Result<bool,StatusCode>{
+    bcrypt::verify(password,hash)
+    .map_err(|_errpr|StatusCode::UNAUTHORIZED)
 }
