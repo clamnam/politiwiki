@@ -102,7 +102,7 @@ Ok(())
 }
 
 fn hash_password (password: String)->Result<String,StatusCode>{
-    bcrypt::hash(password,12)
+    bcrypt::hash(password,11)
     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
 }
 fn verify_password(password: String, hash:&str) ->Result<bool,StatusCode>{

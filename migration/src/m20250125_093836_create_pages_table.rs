@@ -48,8 +48,4 @@ use sea_orm_migration::prelude::*;
         UpdatedAt,
     }
     
-    #[derive(Iden)]
-    enum Content {
-        Table,
-        Id,
-    }
+

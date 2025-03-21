@@ -25,7 +25,18 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Content::CreatedById).integer())
                     .col(ColumnDef::new(Content::ModifiedById).integer())
                     .col(ColumnDef::new(Content::PageId).integer())
-                    .col(ColumnDef::new(Content::Status).integer())
+                    .col(
+                        ColumnDef::new(Content::Status)
+                            .enumeration(
+                                Alias::new("status"), 
+                                [
+                                    StatusValues::Pending, 
+                                    StatusValues::Approved, 
+                                    StatusValues::Rejected, 
+                                    StatusValues::Published
+                                ]
+                            )
+                    )
                     .col(ColumnDef::new(Content::OrderId).integer())
                     .col(ColumnDef::new(Content::IsHidden).boolean())
                     .col(ColumnDef::new(Content::IsDeleted).boolean())
@@ -89,38 +100,50 @@ impl MigrationTrait for Migration {
     }
 }
 
-#[derive(DeriveIden)]
+#[derive(Iden)]
 enum Content {
-    #[sea_orm(iden = "content")]
+    #[iden = "content"]
     Table,
-    #[sea_orm(iden = "id")]
+    #[iden = "id"]
     Id,
-    #[sea_orm(iden = "title")]
+    #[iden = "title"]
     Title,
-    #[sea_orm(iden = "content_type")]
+    #[iden = "content_type"]
     ContentType,
-    #[sea_orm(iden = "content_body")]
+    #[iden = "content_body"]
     ContentBody,
-    #[sea_orm(iden = "images_id")]
+    #[iden = "images_id"]
     ImagesId,
-    #[sea_orm(iden = "created_by_id")]
+    #[iden = "created_by_id"]
     CreatedById,
-    #[sea_orm(iden = "modified_by_id")]
+    #[iden = "modified_by_id"]
     ModifiedById,
-    #[sea_orm(iden = "page_id")]
+    #[iden = "page_id"]
     PageId,
-    #[sea_orm(iden = "status")]
+    #[iden = "status"]
     Status,
-    #[sea_orm(iden = "order_id")]
+    #[iden = "order_id"]
     OrderId,
-    #[sea_orm(iden = "is_hidden")]
+    #[iden = "is_hidden"]
     IsHidden,
-    #[sea_orm(iden = "is_deleted")]
+    #[iden = "is_deleted"]
     IsDeleted,
-    #[sea_orm(iden = "created_at")]
+    #[iden = "created_at"]
     CreatedAt,
-    #[sea_orm(iden = "updated_at")]
+    #[iden = "updated_at"]
     UpdatedAt,
+}
+
+#[derive(Iden)]
+enum StatusValues {
+    #[iden = "pending"]
+    Pending,
+    #[iden = "approved"]
+    Approved,
+    #[iden = "rejected"]
+    Rejected,
+    #[iden = "published"]
+    Published,
 }
 
 #[derive(Iden)]
