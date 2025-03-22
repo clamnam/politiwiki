@@ -17,7 +17,10 @@ use sea_orm_migration::prelude::*;
                                 .auto_increment()
                                 .primary_key(),
                         )
+
                         .col(ColumnDef::new(Pages::Title).string().not_null())
+                        .col(ColumnDef::new(Pages::PageType).integer())
+
                         .col(ColumnDef::new(Pages::CreatedAt).date_time())
                         .col(ColumnDef::new(Pages::UpdatedAt).date_time())
                         .col(ColumnDef::new(Pages::History).json())
@@ -44,6 +47,8 @@ use sea_orm_migration::prelude::*;
         Id,
         #[sea_orm(iden = "title")]
         Title,
+        #[sea_orm(iden = "page_type")]
+        PageType,
         #[sea_orm(iden = "created_at")]
         CreatedAt,
         #[sea_orm(iden = "updated_at")]
