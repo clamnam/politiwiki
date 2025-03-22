@@ -9,6 +9,20 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
     
         manager
+            .create_type(
+                Type::create()
+                    .as_enum(Alias::new("status"))
+                    .values([
+                        StatusValues::Pending, 
+                        StatusValues::Approved, 
+                        StatusValues::Rejected, 
+                        StatusValues::Published
+                    ])
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
             .create_table(
                 Table::create()
                     .table(Content::Table)
@@ -44,6 +58,8 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Content::IsDeleted).boolean())
                     .col(ColumnDef::new(Content::CreatedAt).date_time())
                     .col(ColumnDef::new(Content::UpdatedAt).date_time())
+                    .col(ColumnDef::new(Content::History).json())
+
                     .to_owned(),
             )
             .await?;
@@ -138,6 +154,8 @@ enum Content {
     CreatedAt,
     #[iden = "updated_at"]
     UpdatedAt,
+    #[iden = "history"]
+    History,
 }
 
 #[derive(Iden)]

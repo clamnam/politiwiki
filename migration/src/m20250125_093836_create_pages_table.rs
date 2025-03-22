@@ -20,6 +20,8 @@ use sea_orm_migration::prelude::*;
                         .col(ColumnDef::new(Pages::Title).string().not_null())
                         .col(ColumnDef::new(Pages::CreatedAt).date_time())
                         .col(ColumnDef::new(Pages::UpdatedAt).date_time())
+                        .col(ColumnDef::new(Pages::History).json())
+
                         .to_owned(),
                 )
                 .await?;
@@ -46,6 +48,8 @@ use sea_orm_migration::prelude::*;
         CreatedAt,
         #[sea_orm(iden = "updated_at")]
         UpdatedAt,
+        #[sea_orm(iden = "history")]
+        History,
     }
     
 
