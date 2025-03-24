@@ -28,19 +28,20 @@ pub fn create_routes(database: DatabaseConnection) -> Router<Body> {
         .route("/logout", post(logout))
         
         .route("/page", post(create_page))
-        .route("/content", post(create_content))
         .route("/image", post(create_image))
+        .route("/content", post(create_content))
 
         .route("/page/:id", put(atomic_update_page))
         .route("/page/:id", patch(partial_update_page))
         .route("/image/:id", put(atomic_update_image))
         .route("/image/:id", patch(partial_update_image))
+
         .route_layer(middleware::from_fn(authguard))
 
         //content
+        
         .route("/content/:id", get(get_single_content))
         .route("/content/bypage/:id", get(get_content_by_page))
-
         .route("/content/", get(get_all_content))
 
 
@@ -56,7 +57,6 @@ pub fn create_routes(database: DatabaseConnection) -> Router<Body> {
         .route("/image", get(get_all_image))
         .route("/image/:id", get(get_single_image))
 
-       
 
         .layer(Extension(database))
         // remove this (for debugging )

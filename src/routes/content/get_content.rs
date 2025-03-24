@@ -1,6 +1,27 @@
 use axum::{extract::Path, http::StatusCode, Extension, Json};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use crate::database::content::Entity as Contents;
+use crate::database::sea_orm_active_enums;
+
+#[derive(serde::Deserialize,serde::Serialize)]
+pub enum StatusValues {
+    Pending,
+    Approved,
+    Rejected,
+    Published,
+}
+
+impl From<sea_orm_active_enums::Status> for StatusValues {
+    fn from(status: sea_orm_active_enums::Status) -> Self {
+        match status {
+            sea_orm_active_enums::Status::Pending   => StatusValues::Pending,
+            sea_orm_active_enums::Status::Approved  => StatusValues::Approved,
+            sea_orm_active_enums::Status::Rejected  => StatusValues::Rejected,
+            sea_orm_active_enums::Status::Published => StatusValues::Published,
+        }
+    }
+}
+
 #[derive(serde::Serialize)]
 pub struct ResponseContent {
     id: i32,
@@ -10,22 +31,17 @@ pub struct ResponseContent {
     images_id: Option<i32>,
     created_by_id: Option<i32>,
     modified_by_id: Option<i32>,
-    status: Option<i32>,
+    status: Option<StatusValues>,  // Changed from sea_orm_active_enums::Status to StatusValues
     page_id: Option<i32>,
     order_id: Option<i32>,
     is_hidden: Option<bool>,
     is_deleted: Option<bool>,
-
-
-
 }
-
 
 pub async fn get_single_content(Path(content_id): Path<i32>, Extension(database): Extension<DatabaseConnection>) -> Result<Json<ResponseContent>, StatusCode> {
     let content: Option<crate::database::content::Model> = Contents::find_by_id(content_id).one(&database).await.unwrap();
     if let Some(content) = content {
-
-        Ok(Json(ResponseContent {
+        Ok(axum::Json(ResponseContent {
             id: content.id,
             title: content.title,
             content_type: content.content_type,
@@ -33,19 +49,17 @@ pub async fn get_single_content(Path(content_id): Path<i32>, Extension(database)
             images_id: content.images_id,
             created_by_id: content.created_by_id,
             modified_by_id: content.modified_by_id,
-            status: content.status,
+            status: content.status.map(|s| s.into()),  // Convert sea_orm_active_enums::Status to StatusValues
             order_id: content.order_id,
             page_id: content.page_id,
-
             is_hidden: content.is_hidden,
             is_deleted: content.is_deleted,
-
-            
         }))
     } else {
         Err(StatusCode::NOT_FOUND)
     }
 }
+
 pub async fn get_content_by_page(Path(page_id): Path<i32>, Extension(database): Extension<DatabaseConnection>)-> Result<Json<Vec<ResponseContent>>, StatusCode>{
     let content = Contents::find()
         .filter(crate::database::content::Column::PageId.eq(page_id))
@@ -62,7 +76,7 @@ pub async fn get_content_by_page(Path(page_id): Path<i32>, Extension(database): 
             created_by_id: content.created_by_id,
             modified_by_id: content.modified_by_id,
             page_id: content.page_id,
-            status: content.status,
+            status: content.status.map(|s| s.into()),  // Convert to StatusValues
             order_id: content.order_id,
             is_hidden: content.is_hidden,
             is_deleted: content.is_deleted,
@@ -71,6 +85,7 @@ pub async fn get_content_by_page(Path(page_id): Path<i32>, Extension(database): 
         Err(StatusCode::NOT_FOUND)
     }
 }
+
 pub async fn get_all_content(
     Extension(database): Extension<DatabaseConnection>,
     // Query(query_params): Query<GetContentQueryParams>
@@ -105,7 +120,7 @@ pub async fn get_all_content(
         images_id: Some(db_content.images_id.unwrap_or_default()),
         created_by_id: Some(db_content.created_by_id.unwrap_or_default()),
         modified_by_id: Some(db_content.modified_by_id.unwrap_or_default()),
-        status: Some(db_content.status.unwrap_or_default()),
+        status: db_content.status.map(|s| s.into()),  // Convert to StatusValues
         order_id: Some(db_content.order_id.unwrap_or_default()),
         page_id: Some(db_content.page_id.unwrap_or_default()),
         is_hidden: Some(db_content.is_hidden.unwrap_or_default()),
@@ -116,6 +131,4 @@ pub async fn get_all_content(
 Ok(Json(contents))
 }
 
-pub async fn _get_single_fcontent(){
-    todo!()
-}
+

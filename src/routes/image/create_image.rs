@@ -16,7 +16,7 @@ pub async fn create_image(
     Extension(database): Extension<DatabaseConnection>,
     mut multipart: Multipart,
 ) -> impl IntoResponse {
-    dbg!("create_image");
+    // dbg!("create_image");
     // Iterate over multipart fields
     while let Some(field) = multipart.next_field().await.unwrap() {
         // We assume the file field is named "file"

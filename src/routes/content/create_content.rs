@@ -3,8 +3,16 @@ use axum::http::StatusCode;
 use axum::{Extension, Json};
 use chrono::Utc;
 use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
+use crate::database::sea_orm_active_enums;
 
 use crate::database::{content as contents, images};
+#[derive(serde::Deserialize)]
+pub enum StatusValues {
+    Pending,
+    Approved,
+    Rejected,
+    Published,
+}
 
 #[derive(serde::Deserialize)]
 pub struct RequestContent {
@@ -14,7 +22,6 @@ pub struct RequestContent {
     images_id: Option<i32>,
     created_by_id: Option<i32>,
     modified_by_id: Option<i32>,
-    status: Option<i32>,
     order_id: Option<i32>,
     page_id: Option<i32>,
 }
@@ -50,7 +57,13 @@ pub async fn create_content(
         images_id: Set(checked_image_id),
         created_by_id: Set(request_content.created_by_id),
         modified_by_id: Set(request_content.modified_by_id),
-        status: Set(request_content.status),
+        status: Set(Some(sea_orm_active_enums::Status::Pending)),
+        // Set(request_content.status.map(|s| match s {
+        //     StatusValues::Pending => sea_orm_active_enums::Status::Pending,
+        //     StatusValues::Approved => sea_orm_active_enums::Status::Approved,
+        //     StatusValues::Rejected => sea_orm_active_enums::Status::Rejected,
+        //     StatusValues::Published => sea_orm_active_enums::Status::Published,
+        // })),
         order_id: Set(request_content.order_id),
         page_id: Set(checked_page_id),
 

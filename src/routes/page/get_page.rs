@@ -35,10 +35,10 @@ pub async fn get_all_page(Extension(database): Extension<DatabaseConnection>, Qu
     let mut title_filter = Condition::all();
     if let Some(title) = query_params.title {
         title_filter = if !title.is_empty() {
-            dbg!("title is not empty");
+            // dbg!("title is not empty");
         title_filter.add(pages::Column::Title.eq(title))
         } else {
-            dbg!("title is empty");
+            // dbg!("title is empty");
             title_filter.add(pages::Column::Title.is_null())
 
         }

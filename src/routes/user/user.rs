@@ -85,11 +85,15 @@ pub async fn login(Json(request_user): Json<RequestUser>, Extension(database): E
 
 pub async fn logout(authorization: TypedHeader<Authorization<Bearer>>, Extension(database): Extension<DatabaseConnection>)-> Result<(),StatusCode> {
     let token = authorization.token();
+    dbg!(token);
     let mut user = if let Some(user)= Users::find()
         .filter(users::Column::Token.eq(Some(token)))
         .one(&database)
         .await
-        .map_err(|_error|StatusCode::INTERNAL_SERVER_ERROR)?
+        .map_err(|_error| {
+            eprintln!("{}", _error);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?
 {
     user.into_active_model()
 }else{
