@@ -59,6 +59,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Content::CreatedAt).date_time())
                     .col(ColumnDef::new(Content::UpdatedAt).date_time())
                     .col(ColumnDef::new(Content::History).json())
+                    .col(ColumnDef::new(Content::Queue).json())
 
                     .to_owned(),
             )
@@ -156,6 +157,8 @@ enum Content {
     UpdatedAt,
     #[iden = "history"]
     History,
+    #[iden = "queue"]
+    Queue,
 }
 
 #[derive(Iden)]

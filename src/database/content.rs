@@ -23,6 +23,7 @@ pub struct Model {
     pub created_at: Option<DateTime>,
     pub updated_at: Option<DateTime>,
     pub history: Option<Json>,
+    pub queue: Option<Json>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
