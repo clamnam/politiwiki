@@ -4,6 +4,7 @@ use axum::{Extension, Json};
 use chrono::Utc;
 use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
 use crate::database::sea_orm_active_enums;
+use serde_json::json; // Add this import
 
 use crate::database::{content as contents, images};
 #[derive(serde::Deserialize)]
@@ -24,6 +25,7 @@ pub struct RequestContent {
     modified_by_id: Option<i32>,
     order_id: Option<i32>,
     page_id: Option<i32>,
+
 }
 
 pub async fn create_content(
@@ -40,6 +42,7 @@ pub async fn create_content(
         None
     };
 
+
     // If a page_id is provided, return a 404 if the page does not exist.
     let checked_page_id = if let Some(page_id) = request_content.page_id {
         match crate::database::pages::Entity::find_by_id(page_id).one(&database).await {
@@ -50,6 +53,25 @@ pub async fn create_content(
         None
     };
 
+    // Process queue field by creating a JSON representation of all fields
+    let queue_content = json!({
+        "title": request_content.title,
+        "content_type": request_content.content_type,
+        "content_body": request_content.content_body,
+        "images_id": checked_image_id,
+        "created_by_id": request_content.created_by_id,
+        "modified_by_id": request_content.modified_by_id,
+        "status": "Pending",
+        "order_id": request_content.order_id,
+        "page_id": checked_page_id,
+        "is_deleted": false,
+        "is_hidden": false,
+        "created_at": Utc::now().naive_utc().to_string()
+    });
+
+    // Use the JSON value directly instead of converting to a string
+    let queue_json = Some(queue_content);
+
     let new_contents = contents::ActiveModel {
         title: Set(request_content.title),
         content_type: Set(request_content.content_type),
@@ -58,15 +80,9 @@ pub async fn create_content(
         created_by_id: Set(request_content.created_by_id),
         modified_by_id: Set(request_content.modified_by_id),
         status: Set(Some(sea_orm_active_enums::Status::Pending)),
-        // Set(request_content.status.map(|s| match s {
-        //     StatusValues::Pending => sea_orm_active_enums::Status::Pending,
-        //     StatusValues::Approved => sea_orm_active_enums::Status::Approved,
-        //     StatusValues::Rejected => sea_orm_active_enums::Status::Rejected,
-        //     StatusValues::Published => sea_orm_active_enums::Status::Published,
-        // })),
         order_id: Set(request_content.order_id),
         page_id: Set(checked_page_id),
-
+        queue: Set(queue_json),
         is_deleted: Set(Some(false)),
         is_hidden: Set(Some(false)),
         created_at: Set(Some(Utc::now().naive_utc())),

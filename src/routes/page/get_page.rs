@@ -32,7 +32,6 @@ pub async fn get_single_page(Path(page_id): Path<i32>, Extension(database): Exte
 }
 
 pub async fn get_all_page(Extension(database): Extension<DatabaseConnection>, Query(query_params): Query<GetPageQueryParams>) -> Result<Json<Vec<ResponsePage>>, StatusCode> {
-    dbg!(query_params.title.to_owned());
 
     let mut title_filter = Condition::all();
     if let Some(title) = query_params.title {

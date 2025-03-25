@@ -36,11 +36,21 @@ pub struct ResponseContent {
     order_id: Option<i32>,
     is_hidden: Option<bool>,
     is_deleted: Option<bool>,
+    queue: Option<String>,
+
 }
 
 pub async fn get_single_content(Path(content_id): Path<i32>, Extension(database): Extension<DatabaseConnection>) -> Result<Json<ResponseContent>, StatusCode> {
-    let content: Option<crate::database::content::Model> = Contents::find_by_id(content_id).one(&database).await.unwrap();
-    if let Some(content) = content {
+    let content_result: Option<crate::database::content::Model> = Contents::find_by_id(content_id).one(&database).await.unwrap();
+    
+    if let Some(content) = content_result {
+        // Now access queue from the unwrapped content
+        if let Some(queue_data) = &content.queue {
+            let queue_parsed = json::parse(&queue_data.to_string()).unwrap();
+            let queue_string = queue_parsed.to_string();
+            dbg!(&queue_string);
+        }
+        
         Ok(axum::Json(ResponseContent {
             id: content.id,
             title: content.title,
@@ -49,8 +59,9 @@ pub async fn get_single_content(Path(content_id): Path<i32>, Extension(database)
             images_id: content.images_id,
             created_by_id: content.created_by_id,
             modified_by_id: content.modified_by_id,
-            status: content.status.map(|s| s.into()),  // Convert sea_orm_active_enums::Status to StatusValues
+            status: content.status.map(|s| s.into()),
             order_id: content.order_id,
+            queue: content.queue.map(|q| q.to_string()),
             page_id: content.page_id,
             is_hidden: content.is_hidden,
             is_deleted: content.is_deleted,
@@ -79,6 +90,7 @@ pub async fn get_content_by_page(Path(page_id): Path<i32>, Extension(database): 
             status: content.status.map(|s| s.into()),  // Convert to StatusValues
             order_id: content.order_id,
             is_hidden: content.is_hidden,
+            queue: content.queue.map(|q| q.to_string()),
             is_deleted: content.is_deleted,
         }).collect()))
     } else {
@@ -123,6 +135,7 @@ pub async fn get_all_content(
         status: db_content.status.map(|s| s.into()),  // Convert to StatusValues
         order_id: Some(db_content.order_id.unwrap_or_default()),
         page_id: Some(db_content.page_id.unwrap_or_default()),
+        queue: db_content.queue.map(|q| q.to_string()),
         is_hidden: Some(db_content.is_hidden.unwrap_or_default()),
         is_deleted: Some(db_content.is_deleted.unwrap_or_default()),
     })
