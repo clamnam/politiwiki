@@ -5,10 +5,8 @@ mod page;
 mod image;
 mod custom_middleware;
 
-    // remove this (for debugging )
-
-use tower_http::trace::{self, TraceLayer};
-use tracing::Level;
+// use tower_http::trace::{self, TraceLayer};
+// use tracing::Level;
 //user
 use user::user::{login, register,logout};
 //content
@@ -24,48 +22,33 @@ use custom_middleware::authguard::authguard;
 use sea_orm::DatabaseConnection;
 
 pub fn create_routes(database: DatabaseConnection) -> Router<Body> {
-    Router::new()
+    // Define routes that require authentication
+    let auth_routes = Router::new()
         .route("/logout", post(logout))
-        
-        .route("/page", post(create_page))
         .route("/image", post(create_image))
         .route("/content", post(create_content))
-
+        .route("/page", post(create_page))
         .route("/page/:id", put(atomic_update_page))
         .route("/page/:id", patch(partial_update_page))
         .route("/image/:id", put(atomic_update_image))
         .route("/image/:id", patch(partial_update_image))
+        .layer(middleware::from_fn(authguard));
 
-        .route_layer(middleware::from_fn(authguard))
-
-        //content
-        
+    // Define public routes
+    let public_routes = Router::new()
         .route("/content/:id", get(get_single_content))
         .route("/content/bypage/:id", get(get_content_by_page))
         .route("/content/", get(get_all_content))
-
-
-        //users
         .route("/register", post(register))
         .route("/login", post(login))
-        //page 
         .route("/page", get(get_all_page))
         .route("/page/:id", get(get_single_page))
-
-
-        //image 
         .route("/image", get(get_all_image))
-        .route("/image/:id", get(get_single_image))
+        .route("/image/:id", get(get_single_image));
 
-
+    // Combine routes and add database extension
+    Router::new()
+        .merge(auth_routes)
+        .merge(public_routes)
         .layer(Extension(database))
-        // remove this (for debugging )
-
-        .layer(
-            TraceLayer::new_for_http()
-                .make_span_with(trace::DefaultMakeSpan::new()
-                    .level(Level::INFO))
-                .on_response(trace::DefaultOnResponse::new()
-                    .level(Level::INFO)),
-                )
 }
