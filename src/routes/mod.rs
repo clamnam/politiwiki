@@ -4,14 +4,15 @@ mod user;
 mod page;
 mod image;
 mod custom_middleware;
+mod admin;
 
 // use tower_http::trace::{self, TraceLayer};
 // use tracing::Level;
 //user
 use user::user::{login, register,logout};
 //content
-use content::{create_content::create_content, get_content::{get_all_content, get_single_content,get_content_by_page}};
-
+use content::{create_content::create_content, get_content::{get_all_content, get_single_content,get_content_by_page},update_content::queue_partial_update_content};
+use admin::approve_content::approve_content;
 //page
 use page::{create_page::create_page, get_page::{get_all_page, get_single_page}, update_page::atomic_update_page,partial_update_page::partial_update_page};
 
@@ -27,6 +28,10 @@ pub fn create_routes(database: DatabaseConnection) -> Router<Body> {
         .route("/logout", post(logout))
         .route("/image", post(create_image))
         .route("/content", post(create_content))
+
+        .route("/content/queue/:id", patch(queue_partial_update_content))
+        .route("/content/:id", patch(approve_content))
+
         .route("/page", post(create_page))
         .route("/page/:id", put(atomic_update_page))
         .route("/page/:id", patch(partial_update_page))
@@ -37,6 +42,8 @@ pub fn create_routes(database: DatabaseConnection) -> Router<Body> {
     // Define public routes
     let public_routes = Router::new()
         .route("/content/:id", get(get_single_content))
+
+
         .route("/content/bypage/:id", get(get_content_by_page))
         .route("/content/", get(get_all_content))
         .route("/register", post(register))

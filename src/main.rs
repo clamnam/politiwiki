@@ -8,10 +8,11 @@ pub async fn main() {
     dotenv().ok();
     let database_uri = dotenv!("DATABASE_URL");
     // remove this (for debugging )
-    tracing_subscriber::fmt()
-    .with_target(false)
-    .compact()
-    .init();
+    
+    // tracing_subscriber::fmt()
+    // .with_target(false)
+    // .compact()
+    // .init();
     // println!("{:?}", database_uri);
     run(&database_uri).await;
 }
