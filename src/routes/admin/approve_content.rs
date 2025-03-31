@@ -2,14 +2,18 @@ use axum::http::StatusCode;
 use axum::Json;
 use axum::{extract::Path, Extension, headers::{authorization::Bearer, Authorization}, TypedHeader};
 use chrono::Utc;
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set, ModelTrait};
+use sea_orm::{sea_query, ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter, Set};
 use crate::database::content::{self, Entity as Contents};
+use crate::database::pages::Entity as Pages;
+
 use crate::database::users::{self, Entity as Users};
+
 use crate::database::sea_orm_active_enums::Status;
 use axum::response::IntoResponse;
 use json;
+use sea_query::Expr;
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize,Debug)]
 pub struct RequestContent {
     queue_index: usize,  // Index of the queue item to approve
     modified_by_id: Option<i32>,  // Who is approving the content
@@ -21,6 +25,7 @@ pub async fn approve_content(
     Extension(database): Extension<DatabaseConnection>,
     Json(request_content): Json<RequestContent>
 ) -> impl IntoResponse {
+
     // 1. Check if user is authorized (role >= 5)
     let token = authorization.token();
     let user = match Users::find()
@@ -32,7 +37,6 @@ pub async fn approve_content(
         Ok(None) => return StatusCode::UNAUTHORIZED,
         Err(_) => return StatusCode::INTERNAL_SERVER_ERROR,
         };
-
 
     // Get the user's role
     let role = match user.find_related(crate::database::roles::Entity)
@@ -53,9 +57,23 @@ pub async fn approve_content(
     if role.title.unwrap_or(0) < 5 {
         return StatusCode::FORBIDDEN;
     }
+    
+    let temp = match Pages::find_by_id(id)
+    .one(&database)
+    .await
+{
+    Ok(Some(content)) => content,
+    Ok(None) => return StatusCode::NOT_FOUND,
+    Err(err) => {
+        dbg!(err);
+        return StatusCode::INTERNAL_SERVER_ERROR;
+    }    };
+    // dbg!(&temp);
 
-    // 2. Get the current content
-    let current_content = match Contents::find_by_id(id)
+    let current_content = match temp.find_related(Contents)
+        .filter(content::Column::PageId.eq(id))
+        // Check that the 'queue' JSON array has at least one element
+        .filter(Expr::cust("json_array_length(queue) > 0"))
         .one(&database)
         .await
     {
@@ -64,7 +82,22 @@ pub async fn approve_content(
         Err(err) => {
             dbg!(err);
             return StatusCode::INTERNAL_SERVER_ERROR;
-        }    };
+        }
+    };
+    // print_type_of(&current_content);
+    // dbg!(current_content);
+    // // 2. Get the current content
+    // let current_content = match Contents::find_by_id(id)
+    //     .one(&database)
+    //     .await
+    // {
+    //     Ok(Some(content)) => content,
+    //     Ok(None) => return StatusCode::NOT_FOUND,
+    //     Err(err) => {
+    //         dbg!(err);
+    //         return StatusCode::INTERNAL_SERVER_ERROR;
+    //     }    };
+        // dbg!(&current_content);
 
     // 3. Parse the queue from the content
     let queue_json_str = match &current_content.queue {
@@ -72,17 +105,18 @@ pub async fn approve_content(
         None => return StatusCode::BAD_REQUEST, // No queue exists
     };
 
-dbg!(&queue_json_str);
     let queue_parsed = match json::parse(&queue_json_str) {
         Ok(parsed) if parsed.is_array() => parsed,
         _ => return StatusCode:: BAD_REQUEST, 
     };
+    dbg!("{:?},{:?}", &request_content.queue_index,&queue_parsed);
 
     // 4. Check if the requested queue index exists
     if request_content.queue_index >= queue_parsed.len() {
         return StatusCode::BAD_REQUEST;
 
     }
+    dbg!("hereererherheh{:?}", &request_content.queue_index);
 
     // 5. Get the queue item to be approved
     let queue_item = &queue_parsed[request_content.queue_index];
@@ -169,3 +203,7 @@ dbg!(&queue_json_str);
     }
 }
 
+
+fn print_type_of<T>(_: &T) {
+    println!("{}", std::any::type_name::<T>());
+}
