@@ -37,6 +37,7 @@ pub struct ResponseContent {
     is_hidden: Option<bool>,
     is_deleted: Option<bool>,
     queue: Option<String>,
+    history: Option<String>,
 
 }
 
@@ -62,6 +63,8 @@ pub async fn get_single_content(Path(content_id): Path<i32>, Extension(database)
             status: content.status.map(|s| s.into()),
             order_id: content.order_id,
             queue: content.queue.map(|q| q.to_string()),
+            history: content.history.map(|h| h.to_string()),
+
             page_id: content.page_id,
             is_hidden: content.is_hidden,
             is_deleted: content.is_deleted,
@@ -91,6 +94,7 @@ pub async fn get_content_by_page(Path(page_id): Path<i32>, Extension(database): 
             order_id: content.order_id,
             is_hidden: content.is_hidden,
             queue: content.queue.map(|q| q.to_string()),
+            history: content.history.map(|h| h.to_string()),
             is_deleted: content.is_deleted,
         }).collect()))
     } else {
@@ -136,6 +140,8 @@ pub async fn get_all_content(
         order_id: Some(db_content.order_id.unwrap_or_default()),
         page_id: Some(db_content.page_id.unwrap_or_default()),
         queue: db_content.queue.map(|q| q.to_string()),
+        history: db_content.history.map(|h| h.to_string()),
+
         is_hidden: Some(db_content.is_hidden.unwrap_or_default()),
         is_deleted: Some(db_content.is_deleted.unwrap_or_default()),
     })

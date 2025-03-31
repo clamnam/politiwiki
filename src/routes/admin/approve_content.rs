@@ -12,6 +12,7 @@ use json;
 #[derive(serde::Deserialize)]
 pub struct RequestContent {
     queue_index: usize,  // Index of the queue item to approve
+    modified_by_id: Option<i32>,  // Who is approving the content
 }
 
 pub async fn approve_content(
@@ -30,22 +31,25 @@ pub async fn approve_content(
         Ok(Some(user)) => user,
         Ok(None) => return StatusCode::UNAUTHORIZED,
         Err(_) => return StatusCode::INTERNAL_SERVER_ERROR,
-    };
+        };
 
-    // Get authenticated user's ID to use as modified_by_id
-    let current_user_id = user.id;
 
     // Get the user's role
     let role = match user.find_related(crate::database::roles::Entity)
         .one(&database)
         .await
     {
+
         Ok(Some(role)) => role,
         Ok(None) => return StatusCode::FORBIDDEN,  // User has no role
-        Err(_) => return StatusCode::INTERNAL_SERVER_ERROR,
+        Err(err) => {
+            dbg!(err);
+            return StatusCode::INTERNAL_SERVER_ERROR;
+        }
     };
 
     // Check if role is at least 5
+
     if role.title.unwrap_or(0) < 5 {
         return StatusCode::FORBIDDEN;
     }
@@ -57,25 +61,29 @@ pub async fn approve_content(
     {
         Ok(Some(content)) => content,
         Ok(None) => return StatusCode::NOT_FOUND,
-        Err(_) => return StatusCode::INTERNAL_SERVER_ERROR,
-    };
+        Err(err) => {
+            dbg!(err);
+            return StatusCode::INTERNAL_SERVER_ERROR;
+        }    };
 
     // 3. Parse the queue from the content
     let queue_json_str = match &current_content.queue {
         Some(queue) => queue.to_string(),
         None => return StatusCode::BAD_REQUEST, // No queue exists
     };
-    
+
+dbg!(&queue_json_str);
     let queue_parsed = match json::parse(&queue_json_str) {
         Ok(parsed) if parsed.is_array() => parsed,
-        _ => return StatusCode::BAD_REQUEST, // Queue is not properly formatted
+        _ => return StatusCode:: BAD_REQUEST, 
     };
-    
+
     // 4. Check if the requested queue index exists
     if request_content.queue_index >= queue_parsed.len() {
         return StatusCode::BAD_REQUEST;
+
     }
-    
+
     // 5. Get the queue item to be approved
     let queue_item = &queue_parsed[request_content.queue_index];
     
@@ -135,7 +143,7 @@ pub async fn approve_content(
         content_body: Set(queue_item["content_body"].as_str().map(|s| s.to_string())),
         images_id: Set(queue_item["images_id"].as_i32()),
         created_by_id: Set(queue_item["created_by_id"].as_i32()),
-        modified_by_id: Set(Some(current_user_id)), // Use authenticated user's ID
+        modified_by_id: Set(request_content.modified_by_id.or(current_content.modified_by_id)),
         page_id: Set(queue_item["page_id"].as_i32()),
         status: Set(Some(Status::Published)),  // Set status to Published
         order_id: Set(queue_item["order_id"].as_i32()),
