@@ -84,21 +84,10 @@ pub async fn approve_content(
             return StatusCode::INTERNAL_SERVER_ERROR;
         }
     };
-    // print_type_of(&current_content);
-    // dbg!(current_content);
-    // // 2. Get the current content
-    // let current_content = match Contents::find_by_id(id)
-    //     .one(&database)
-    //     .await
-    // {
-    //     Ok(Some(content)) => content,
-    //     Ok(None) => return StatusCode::NOT_FOUND,
-    //     Err(err) => {
-    //         dbg!(err);
-    //         return StatusCode::INTERNAL_SERVER_ERROR;
-    //     }    };
-        // dbg!(&current_content);
-
+    
+    // Get the actual content ID that needs to be updated
+    let content_id = current_content.id;
+    
     // 3. Parse the queue from the content
     let queue_json_str = match &current_content.queue {
         Some(queue) => queue.to_string(),
@@ -116,8 +105,6 @@ pub async fn approve_content(
         return StatusCode::BAD_REQUEST;
 
     }
-    dbg!("hereererherheh{:?}", &request_content.queue_index);
-
     // 5. Get the queue item to be approved
     let queue_item = &queue_parsed[request_content.queue_index];
     
@@ -171,7 +158,7 @@ pub async fn approve_content(
     
     // 9. Update the content with approved changes
     let update_content = content::ActiveModel {
-        id: Set(id),
+        id: Set(content_id),  // Use the correct content ID instead of page ID
         title: Set(queue_item["title"].as_str().map(|s| s.to_string())),
         content_type: Set(queue_item["content_type"].as_i32()),
         content_body: Set(queue_item["content_body"].as_str().map(|s| s.to_string())),
@@ -191,7 +178,7 @@ pub async fn approve_content(
     
     // 10. Save to database
     match Contents::update(update_content)
-        .filter(content::Column::Id.eq(id))
+        .filter(content::Column::Id.eq(content_id))  // Filter by content ID, not page ID
         .exec(&database)
         .await
     {
@@ -204,6 +191,3 @@ pub async fn approve_content(
 }
 
 
-fn print_type_of<T>(_: &T) {
-    println!("{}", std::any::type_name::<T>());
-}
