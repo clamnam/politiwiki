@@ -30,6 +30,9 @@ pub struct ResponseContent {
     content_body: Option<String>,
     images_id: Option<i32>,
     created_by_id: Option<i32>,
+    created_at: Option<chrono::NaiveDateTime>,
+    updated_at: Option<chrono::NaiveDateTime>,
+
     modified_by_id: Option<i32>,
     status: Option<StatusValues>,  // Changed from sea_orm_active_enums::Status to StatusValues
     page_id: Option<i32>,
@@ -60,6 +63,8 @@ pub async fn get_single_content(Path(content_id): Path<i32>, Extension(database)
             images_id: content.images_id,
             created_by_id: content.created_by_id,
             modified_by_id: content.modified_by_id,
+            created_at: content.created_at,
+            updated_at: content.updated_at,
             status: content.status.map(|s| s.into()),
             order_id: content.order_id,
             queue: content.queue.map(|q| q.to_string()),
@@ -88,6 +93,8 @@ pub async fn get_content_by_page(Path(page_id): Path<i32>, Extension(database): 
             content_body: content.content_body,
             images_id: content.images_id,
             created_by_id: content.created_by_id,
+            created_at: content.created_at,
+            updated_at: content.updated_at,
             modified_by_id: content.modified_by_id,
             page_id: content.page_id,
             status: content.status.map(|s| s.into()),  // Convert to StatusValues
@@ -144,6 +151,8 @@ pub async fn get_all_content(
 
         is_hidden: Some(db_content.is_hidden.unwrap_or_default()),
         is_deleted: Some(db_content.is_deleted.unwrap_or_default()),
+        created_at: Some(db_content.created_at.unwrap_or_default()),
+        updated_at: Some(db_content.updated_at.unwrap_or_default()),
     })
     .collect();
 
