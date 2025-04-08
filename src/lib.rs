@@ -1,14 +1,41 @@
 mod database;
 mod routes;
 mod utils;
+use axum::http;
 use routes::create_routes;
 use sea_orm::Database;
+use std::net::SocketAddr;
+use tower_http::cors::CorsLayer;
+use http::{Method, header,HeaderValue};
+use std::env;
 
-pub async fn run(database_uri: &str) {
-    let database = Database::connect(database_uri).await.unwrap();
-    let app = create_routes(database);
-    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
-    .serve(app.into_make_service())
-    .await
-    .unwrap()
+pub async fn run(database_url: &str) {
+    let database = Database::connect(database_url).await.unwrap();
+    
+    // Create a CORS layer that will apply to all routes
+    let cors = CorsLayer::new()
+        // Allow requests from your frontend
+        .allow_origin(
+            env::var("FRONTEND_URL")
+                .unwrap_or_else(|_| "http://localhost:5173".to_string())
+                .parse::<HeaderValue>()
+                .unwrap()
+        )
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
+        .allow_headers([header::CONTENT_TYPE, header::AUTHORIZATION])
+        .allow_credentials(true);
+
+    // Build your router with routes
+    let app = create_routes(database)
+        // Apply the CORS layer globally to all routes
+        .layer(cors);
+    
+    // Set up your server
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    println!("Server listening on {}", addr);
+    
+    axum::Server::bind(&addr)
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 }

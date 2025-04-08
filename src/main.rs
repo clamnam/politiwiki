@@ -1,18 +1,16 @@
 // filepath: /Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/src/main.rs
-use dotenvy_macro::dotenv;
 use politiwiki::run;
 use dotenvy::dotenv;
+use std::env;
 
 #[tokio::main]
 pub async fn main() {
     dotenv().ok();
-    let database_uri = dotenv!("DATABASE_URL");
-    // remove this (for debugging )
+    // Get DATABASE_URL at runtime instead of compile time
+    let database_uri = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     
-    // tracing_subscriber::fmt()
-    // .with_target(false)
-    // .compact()
-    // .init();
-    // println!("{:?}", database_uri);
+    // For debugging (uncomment if needed)
+    // println!("Using database: {}", database_uri);
+    
     run(&database_uri).await;
 }
