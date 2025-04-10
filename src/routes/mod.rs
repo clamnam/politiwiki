@@ -1,4 +1,4 @@
-use axum::{body::Body, middleware, routing::{get, patch, post, put}, Extension, Router};
+use axum::{body::Body, middleware, routing::{delete, get, patch, post, put}, Extension, Router};
 mod content;
 mod user;
 mod page;
@@ -11,7 +11,7 @@ mod admin;
 //user
 use user::user::{login, register,logout};
 //content
-use content::{create_content::create_content, get_content::{get_all_content, get_single_content,get_content_by_page},update_content::queue_partial_update_content};
+use content::{create_content::create_content, get_content::{get_all_content, get_single_content,get_content_by_page},update_content::queue_partial_update_content,delete_content::queue_delete_content};
 use admin::approve_content::approve_content;
 //page
 use page::{create_page::create_page, get_page::{get_all_page, get_single_page}, update_page::atomic_update_page,partial_update_page::partial_update_page};
@@ -30,6 +30,8 @@ pub fn create_routes(database: DatabaseConnection) -> Router<Body> {
         .route("/content", post(create_content))
 
         .route("/content/queue/:id", patch(queue_partial_update_content))
+        .route("/content/queue/:id", delete(queue_delete_content))
+
         .route("/content/:id", patch(approve_content))
 
         .route("/page", post(create_page))

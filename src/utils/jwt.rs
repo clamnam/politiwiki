@@ -12,6 +12,7 @@ pub struct Claims{
 }
 
 pub fn create_jwt() -> Result<String,StatusCode>{ 
+    
     let mut now = Utc::now();
     let iat = now.timestamp() as usize;
     let expires_in = Duration::hours(24);
