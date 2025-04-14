@@ -23,12 +23,11 @@ pub enum StatusValues {
 #[derive(serde::Deserialize)]
 pub struct RequestContent {
     title: String,
-    content_type: Option<i32>,
+    content_type: i32,
     content_body: String,
     images_id: Option<i32>,
-    created_by_id: Option<i32>,
     modified_by_id: Option<i32>,
-    order_id: Option<i32>,
+    order_id: i32,
     page_id: i32,
 
 }
@@ -90,21 +89,20 @@ pub async fn create_content(
     
 
     let new_contents = contents::ActiveModel {
-        title: Set(Some(request_content.title)),
+        title: Set(request_content.title),
         content_type: Set(request_content.content_type),
-        content_body: Set(Some(request_content.content_body)),
+        content_body: Set(request_content.content_body),
         images_id: Set(checked_image_id),
-        created_by_id: Set(request_content.created_by_id),
+        created_by_id: Set(user.id),
         modified_by_id: Set(request_content.modified_by_id),
-        status: Set(Some(sea_orm_active_enums::Status::Pending)),
-        order_id: Set(request_content.order_id),
-        page_id: Set(checked_page_id),
+        status: Set(sea_orm_active_enums::Status::Pending),
+        order_id: Set(Some(request_content.order_id)),
+        page_id: Set(checked_page_id.unwrap_or_default()),
         queue: Set(queue_json),
         history: Set(Some(empty_history_serde_json)),
-
-        is_deleted: Set(Some(false)),
-        is_hidden: Set(Some(false)),
-        created_at: Set(Some(Utc::now().naive_utc())),
+        is_deleted: Set(false),
+        is_hidden: Set(false),
+        created_at: Set(Utc::now().naive_utc()),
         ..Default::default()
     };
 

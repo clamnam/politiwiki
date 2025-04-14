@@ -1,12 +1,16 @@
+use axum::headers::authorization::Bearer;
+use axum::headers::Authorization;
+use axum::response::IntoResponse;
 use axum::http::StatusCode;
-use axum::Json;
-use axum::{extract::Path, Extension};
+use axum::{Extension, Json, TypedHeader};
+
+use axum::extract::Path;
 use chrono::Utc;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use crate::database::content::{self, Entity as Contents};
+use crate::database::users::{self, Entity as Users};
 // Add this import for the Status enum
 // use crate::database::sea_orm_active_enums::Status;
-use axum::response::IntoResponse;
 use json;
 
 // pub enum StatusValues {
@@ -18,30 +22,41 @@ use json;
 
 #[derive(serde::Deserialize)]
 pub struct RequestContent {
-    title: Option<String>,
-    content_body: Option<String>,
+    title: String,
+    content_body: String,
     images_id: Option<i32>,
     created_by_id: Option<i32>,
-    modified_by_id: Option<i32>,
     order_id: Option<i32>,
     page_id: Option<i32>,
 }
 
 pub async fn queue_partial_update_content(
+    authorization: TypedHeader<Authorization<Bearer>>,
+
     Path(id): Path<i32>,
     Extension(database): Extension<DatabaseConnection>,
     Json(request_content): Json<RequestContent>
 ) -> impl IntoResponse {
+    let token: &str = authorization.token();
+    let user = match Users::find()
+        .filter(users::Column::Token.eq(Some(token)))
+        .one(&database)
+        .await
+    {
+        Ok(Some(user)) => user,
+        Ok(None) => return Err(StatusCode::UNAUTHORIZED),
+        Err(_) => return Err(StatusCode::INTERNAL_SERVER_ERROR),
+    };
     let current = match Contents::find_by_id(id)
         .one(&database)
         .await {
             Ok(Some(content)) => content,
-            Ok(None) => return StatusCode::NOT_FOUND,
-            Err(_) => return StatusCode::INTERNAL_SERVER_ERROR,
+            Ok(None) => return Err(StatusCode::NOT_FOUND),
+            Err(_) => return Err(StatusCode::INTERNAL_SERVER_ERROR),
         };
         
     // Check if page_id and images_id exists in the request or use current values
-    let checked_page_id = request_content.page_id.or(current.page_id);
+    let checked_page_id = request_content.page_id.or(Some(current.page_id));
     let checked_image_id = request_content.images_id.or(current.images_id);
 
     // Create new queue entry
@@ -51,13 +66,14 @@ pub async fn queue_partial_update_content(
         "content_body": request_content.content_body.clone(),
         "images_id": checked_image_id,
         "created_by_id": request_content.created_by_id,
-        "modified_by_id": request_content.modified_by_id,
+        "modified_by_id": Utc::now().naive_utc().to_string(),
         "status": "Pending",
+        "modified_by_id": user.id,
         "order_id": request_content.order_id,
         "page_id": checked_page_id,
         "is_deleted": false,
         "is_hidden": false,
-        "created_at": Utc::now().naive_utc().to_string()
+        "created_at": current.created_at.to_string()
     };
 
     // Initialize queue entries
@@ -112,8 +128,8 @@ pub async fn queue_partial_update_content(
         .exec(&database)
         .await
     {
-        Ok(_) => StatusCode::OK,
-        Err(_) => StatusCode::INTERNAL_SERVER_ERROR,
+        Ok(_) => Ok(StatusCode::OK),
+        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
     }
 }
 

@@ -25,18 +25,19 @@ impl From<sea_orm_active_enums::Status> for StatusValues {
 #[derive(serde::Serialize)]
 pub struct ResponseContent {
     id: i32,
-    title: Option<String>,
-    content_type: Option<i32>,
-    content_body: Option<String>,
+
+    title: String,
+    content_type: i32,
+    content_body: String,
     images_id: Option<i32>,
-    created_by_id: Option<i32>,
+    created_by_id: i32,
+    modified_by_id: Option<i32>,
+    order_id: i32,
+    page_id: i32,
     created_at: Option<chrono::NaiveDateTime>,
     updated_at: Option<chrono::NaiveDateTime>,
-
-    modified_by_id: Option<i32>,
     status: Option<StatusValues>,  // Changed from sea_orm_active_enums::Status to StatusValues
-    page_id: Option<i32>,
-    order_id: Option<i32>,
+
     is_hidden: Option<bool>,
     is_deleted: Option<bool>,
     queue: Option<String>,
@@ -63,16 +64,16 @@ pub async fn get_single_content(Path(content_id): Path<i32>, Extension(database)
             images_id: content.images_id,
             created_by_id: content.created_by_id,
             modified_by_id: content.modified_by_id,
-            created_at: content.created_at,
+            created_at: Some(content.created_at),
             updated_at: content.updated_at,
-            status: content.status.map(|s| s.into()),
-            order_id: content.order_id,
+            status: Some(content.status.into()),  // Wrap the non-optional Status in Some
+            order_id: content.order_id.unwrap_or_default(),
             queue: content.queue.map(|q| q.to_string()),
             history: content.history.map(|h| h.to_string()),
 
             page_id: content.page_id,
-            is_hidden: content.is_hidden,
-            is_deleted: content.is_deleted,
+            is_hidden: Some(content.is_hidden),
+            is_deleted: Some(content.is_deleted),
         }))
     } else {
         Err(StatusCode::NOT_FOUND)
@@ -93,16 +94,16 @@ pub async fn get_content_by_page(Path(page_id): Path<i32>, Extension(database): 
             content_body: content.content_body,
             images_id: content.images_id,
             created_by_id: content.created_by_id,
-            created_at: content.created_at,
+            created_at: Some(content.created_at),
             updated_at: content.updated_at,
             modified_by_id: content.modified_by_id,
             page_id: content.page_id,
-            status: content.status.map(|s| s.into()),  // Convert to StatusValues
-            order_id: content.order_id,
-            is_hidden: content.is_hidden,
+            status: Some(content.status.into()),  // Wrap the non-optional Status in Some
+            order_id: content.order_id.unwrap_or_default(),
+            is_hidden: Some(content.is_hidden),
             queue: content.queue.map(|q| q.to_string()),
             history: content.history.map(|h| h.to_string()),
-            is_deleted: content.is_deleted,
+            is_deleted: Some(content.is_deleted),
         }).collect()))
     } else {
         Err(StatusCode::NOT_FOUND)
@@ -137,21 +138,21 @@ pub async fn get_all_content(
     .into_iter()
     .map(|db_content| ResponseContent {
         id: db_content.id,
-        title: Some(db_content.title.unwrap_or_default().to_string()),
-        content_type: Some(db_content.content_type.unwrap_or_default()),
-        content_body: Some(db_content.content_body.unwrap_or_default()),
+        title: db_content.title.to_string(),
+        content_type: db_content.content_type,
+        content_body: db_content.content_body,
         images_id: Some(db_content.images_id.unwrap_or_default()),
-        created_by_id: Some(db_content.created_by_id.unwrap_or_default()),
+        created_by_id: db_content.created_by_id,
         modified_by_id: Some(db_content.modified_by_id.unwrap_or_default()),
-        status: db_content.status.map(|s| s.into()),  // Convert to StatusValues
-        order_id: Some(db_content.order_id.unwrap_or_default()),
-        page_id: Some(db_content.page_id.unwrap_or_default()),
+        status: Some(db_content.status.into()),  // Wrap the non-optional Status in Some
+        order_id: db_content.order_id.unwrap_or_default(),
+        page_id: db_content.page_id,
         queue: db_content.queue.map(|q| q.to_string()),
         history: db_content.history.map(|h| h.to_string()),
 
-        is_hidden: Some(db_content.is_hidden.unwrap_or_default()),
-        is_deleted: Some(db_content.is_deleted.unwrap_or_default()),
-        created_at: Some(db_content.created_at.unwrap_or_default()),
+        is_hidden: Some(db_content.is_hidden),
+        is_deleted: Some(db_content.is_deleted),
+        created_at: Some(db_content.created_at),
         updated_at: Some(db_content.updated_at.unwrap_or_default()),
     })
     .collect();

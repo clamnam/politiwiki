@@ -6,7 +6,7 @@ use crate::database::content::{self, Entity as Contents};
 // Add this import for the Status enum
 // use crate::database::sea_orm_active_enums::Status;
 use axum::response::IntoResponse;
-use json;
+use axum::{debug_handler, Json};
 
 // pub enum StatusValues {
 //     Pending,
@@ -14,20 +14,28 @@ use json;
 //     Rejected,
 //     Published,
 // }
+#[derive(serde::Deserialize, serde::Serialize)]
+pub struct RequestContent {
+    pub id: i32,
 
-
+}
+#[debug_handler]// NOTE AMAZING
 pub async fn queue_delete_content(
     Path(id): Path<i32>,
     Extension(database): Extension<DatabaseConnection>,
+    Json(request_content): Json<RequestContent>
+
 ) -> impl IntoResponse {
-    let current = match Contents::find_by_id(id)
+    
+    let current = match Contents::find_by_id(request_content.id)
         .one(&database)
+
         .await {
             Ok(Some(content)) => content,
             Ok(None) => return StatusCode::NOT_FOUND,
             Err(_) => return StatusCode::INTERNAL_SERVER_ERROR,
+
         };
-        
 
     // Create new queue entry
     let new_queue_entry = json::object!{

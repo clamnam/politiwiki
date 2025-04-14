@@ -34,11 +34,11 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Content::Title).string())
-                    .col(ColumnDef::new(Content::ContentType).integer())
-                    .col(ColumnDef::new(Content::ContentBody).text())
+                    .col(ColumnDef::new(Content::Title).string().not_null())
+                    .col(ColumnDef::new(Content::ContentType).integer().not_null())
+                    .col(ColumnDef::new(Content::ContentBody).text().not_null())
                     .col(ColumnDef::new(Content::ImagesId).integer())
-                    .col(ColumnDef::new(Content::CreatedById).integer())
+                    .col(ColumnDef::new(Content::CreatedById).integer().not_null())
                     .col(ColumnDef::new(Content::ModifiedById).integer())
                     .col(ColumnDef::new(Content::PageId).integer())
                     .col(
@@ -51,12 +51,12 @@ impl MigrationTrait for Migration {
                                     StatusValues::Rejected, 
                                     StatusValues::Published
                                 ]
-                            )
+                            ).not_null()
                     )
                     .col(ColumnDef::new(Content::OrderId).integer())
-                    .col(ColumnDef::new(Content::IsHidden).boolean())
-                    .col(ColumnDef::new(Content::IsDeleted).boolean())
-                    .col(ColumnDef::new(Content::CreatedAt).date_time())
+                    .col(ColumnDef::new(Content::IsHidden).boolean().not_null().default(false))
+                    .col(ColumnDef::new(Content::IsDeleted).boolean().not_null().default(false))
+                    .col(ColumnDef::new(Content::CreatedAt).date_time().not_null())
                     .col(ColumnDef::new(Content::UpdatedAt).date_time())
                     .col(ColumnDef::new(Content::History).json())
                     .col(ColumnDef::new(Content::Queue).json())

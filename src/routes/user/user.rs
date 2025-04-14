@@ -8,7 +8,7 @@ use crate::database::{roles, users::Entity as Users};
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, IntoActiveModel, QueryFilter, Set};
 
 use crate::database::users;
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize,Debug)]
 pub struct RequestUser {
     email: Option<String>,
     username: String,
@@ -54,8 +54,7 @@ pub async fn register(Extension(database): Extension<DatabaseConnection>,Json(re
     }))
 }
 pub async fn login(Json(request_user): Json<RequestUser>, Extension(database): Extension<DatabaseConnection>) -> Result<Json<ResponseUser>,StatusCode> {
-
-    let db_user = users::Entity::find()
+        println!("Request user: {:?}", &request_user); let db_user = users::Entity::find()
         .filter(users::Column::Username.eq(request_user.username))
         .one(&database)
         .await
