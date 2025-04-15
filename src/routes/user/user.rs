@@ -26,12 +26,12 @@ pub struct ResponseUser {
 pub async fn register(Extension(database): Extension<DatabaseConnection>,Json(request_user): Json<RequestUser>) -> Result<Json<ResponseUser>,StatusCode> {
     let jwt = create_jwt()?;
     let new_role = roles::ActiveModel {
-        title: Set(Some(5)),
+        title: Set(0.5),
         ..Default::default()
     }
-    .save(&database)
-    .await
-    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        .save(&database)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     let new_user = users::ActiveModel {
         email: Set(request_user.email.unwrap_or_default()),
@@ -54,7 +54,8 @@ pub async fn register(Extension(database): Extension<DatabaseConnection>,Json(re
     }))
 }
 pub async fn login(Json(request_user): Json<RequestUser>, Extension(database): Extension<DatabaseConnection>) -> Result<Json<ResponseUser>,StatusCode> {
-        println!("Request user: {:?}", &request_user); let db_user = users::Entity::find()
+        println!("Request user: {:?}", &request_user); 
+        let db_user = users::Entity::find()
         .filter(users::Column::Username.eq(request_user.username))
         .one(&database)
         .await

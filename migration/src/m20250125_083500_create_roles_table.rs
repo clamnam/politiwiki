@@ -17,7 +17,7 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Roles::Title).integer())
+                    .col(ColumnDef::new(Roles::Title).float().not_null())
                     .to_owned(),
             )
             .await

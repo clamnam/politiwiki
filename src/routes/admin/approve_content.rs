@@ -59,8 +59,8 @@ pub async fn approve_content(
 
     // Check if role is at least 5
 
-    if role.title.unwrap_or(0) < 5 {
-        return StatusCode::FORBIDDEN;
+    if role.title < 0.5 {
+        return StatusCode::UNAUTHORIZED;
     }
 
     let temp = match Pages::find_by_id(id).one(&database).await {
@@ -192,7 +192,7 @@ pub async fn approve_content(
         history: Set(Some(history_serde_json)),
         queue: Set(Some(queue_serde_json)),
     };
-
+    
     // 10. Save to database
     match Contents::update(update_content)
         .filter(content::Column::Id.eq(content_id)) // Filter by content ID, not page ID
@@ -205,4 +205,5 @@ pub async fn approve_content(
             StatusCode::INTERNAL_SERVER_ERROR
         }
     }
+
 }
