@@ -1,6 +1,8 @@
-pub async fn role_augment(current_role:f32,polarity: bool){
-    let mult = -0.1;
-    if polarity = 1{ mult = 0.1}
-    current_role += current_role *mult;
-    return current_role
+pub fn role_augment(current_role:f32,positive: bool)->f32{
+    let mut mult = -1.1;
+    if positive == true{
+        mult = 1.1
+    }
+    let updated_role = current_role *mult;
+    return updated_role
 }
