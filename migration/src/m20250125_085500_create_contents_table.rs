@@ -40,7 +40,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Content::ImagesId).integer())
                     .col(ColumnDef::new(Content::CreatedById).integer().not_null())
                     .col(ColumnDef::new(Content::ModifiedById).integer())
-                    .col(ColumnDef::new(Content::PageId).integer())
+                    .col(ColumnDef::new(Content::PageId).integer().not_null())
                     .col(
                         ColumnDef::new(Content::Status)
                             .enumeration(

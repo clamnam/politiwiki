@@ -1,7 +1,11 @@
 use crate::database::content::{self, Entity as Contents};
+use crate::database::roles::{self, Entity as Role};
+
 use crate::database::pages::Entity as Pages;
+use crate::utils::role::role_augment;
 use axum::http::StatusCode;
 use axum::Json;
+// use crate::utils::role::role_augment;
 use axum::{
     extract::Path,
     headers::{authorization::Bearer, Authorization},
@@ -59,8 +63,8 @@ pub async fn approve_content(
 
     // Check if role is at least 5
 
-    if role.title.unwrap_or(0) < 5 {
-        return StatusCode::FORBIDDEN;
+    if role.title < 0.5 {
+        return StatusCode::UNAUTHORIZED;
     }
 
     let temp = match Pages::find_by_id(id).one(&database).await {
@@ -192,7 +196,7 @@ pub async fn approve_content(
         history: Set(Some(history_serde_json)),
         queue: Set(Some(queue_serde_json)),
     };
-
+    
     // 10. Save to database
     match Contents::update(update_content)
         .filter(content::Column::Id.eq(content_id)) // Filter by content ID, not page ID
@@ -204,5 +208,26 @@ pub async fn approve_content(
             dbg!(err, "Error updating content");
             StatusCode::INTERNAL_SERVER_ERROR
         }
-    }
+    };
+    let update_role_title =  role_augment(role.title,true);
+
+    let update_role = roles::ActiveModel{
+        id : Set(role.id),
+        title: Set(update_role_title)
+    };
+
+    let new_role = match Role::update(update_role)
+    .exec(&database)
+    .await {
+        Ok(_) => StatusCode::OK,
+        Err(err) => {
+            dbg!(err, "Error updating content");
+            StatusCode::INTERNAL_SERVER_ERROR
+        }
+    };
+
+    new_role
+
+
+
 }
