@@ -76,7 +76,6 @@ pub async fn approve_content(
         Ok(parsed) if parsed.is_array() => parsed,
         _ => return StatusCode::BAD_REQUEST,
     };
-    dbg!("{:?},{:?}", &request_content.queue_index, &queue_parsed);
 
     // 4. Check if the requested queue index exists
     if request_content.queue_index >= queue_parsed.len() {
@@ -84,11 +83,13 @@ pub async fn approve_content(
     }
     // 5. Get the queue item to be approved
     let queue_item = queue_parsed[request_content.queue_index].to_owned();
-
+    dbg!(&request_content);
     // Branch based on approval decision
-    if request_content.approval {
+    if &request_content.approval == &true  {
+        dbg!("approving");
         process_approval(&current_content, &queue_item, &queue_parsed, &request_content, role, &database).await
     } else {
+        dbg!("denying");
         process_denial(&current_content, &queue_item, &queue_parsed, &request_content, role, &database).await
     }
 }
@@ -305,7 +306,7 @@ async fn process_denial(
         }
     };
     
-    let update_role_title = role_augment(role.title, true);
+    let update_role_title = role_augment(role.title, false);
 
     let update_role = roles::ActiveModel {
         id: Set(role.id),
