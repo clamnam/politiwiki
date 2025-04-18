@@ -1,5 +1,5 @@
 pub fn role_augment(current_role:f32,positive: bool)->f32{
-    let mut mult = -1.1;
+    let mut mult = 0.9;
     if positive == true{
         mult = 1.1
     }

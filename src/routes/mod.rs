@@ -5,6 +5,7 @@ mod page;
 mod image;
 mod custom_middleware;
 mod admin;
+mod role;
 
 // use tower_http::trace::{self, TraceLayer};
 // use tracing::Level;
@@ -17,6 +18,8 @@ use admin::approve_content::approve_content;
 use page::{create_page::create_page, get_page::{get_all_page, get_single_page}, update_page::atomic_update_page,partial_update_page::partial_update_page};
 
 use image::{create_image::create_image, get_image::{get_all_image, get_single_image}, update_image::atomic_update_image,partial_update_image::partial_update_image};
+
+use role::get_role::get_role;
 
 use custom_middleware::authguard::authguard;
 
@@ -31,8 +34,9 @@ pub fn create_routes(database: DatabaseConnection) -> Router<Body> {
 
         .route("/content/queue/:id", patch(queue_partial_update_content))
         .route("/content/queue/:id", delete(queue_delete_content))
+        .route("/role/",get(get_role))
 
-        .route("/content/:id", patch(approve_content))
+        .route("/content/approve/:id", patch(approve_content))
 
         .route("/page", post(create_page))
         .route("/page/:id", put(atomic_update_page))
