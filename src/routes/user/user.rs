@@ -1,7 +1,7 @@
 
 use crate::utils::jwt::create_jwt;
 use axum::{headers::{authorization::Bearer, Authorization}, http::StatusCode, Extension, Json, TypedHeader};
-use chrono::Utc;
+use chrono::{NaiveDateTime, Utc};
 
 use crate::database::{roles, users::Entity as Users};
 
@@ -20,6 +20,8 @@ pub struct ResponseUser {
     email: String,
     username: String,
     token: String,
+    role_id:i32,
+    created_at: NaiveDateTime,
 }
 
 
@@ -51,10 +53,12 @@ pub async fn register(Extension(database): Extension<DatabaseConnection>,Json(re
         email: new_user.email.unwrap(),
         username: new_user.username.unwrap(),
         token: new_user.token.unwrap().unwrap(),
+        role_id:new_user.role_id.unwrap().unwrap_or_default(),
+        created_at:new_user.created_at.unwrap().unwrap()
+
     }))
 }
 pub async fn login(Json(request_user): Json<RequestUser>, Extension(database): Extension<DatabaseConnection>) -> Result<Json<ResponseUser>,StatusCode> {
-        println!("Request user: {:?}", &request_user); 
         let db_user = users::Entity::find()
         .filter(users::Column::Username.eq(request_user.username))
         .one(&database)
@@ -77,7 +81,11 @@ pub async fn login(Json(request_user): Json<RequestUser>, Extension(database): E
             id: saved_user.id.unwrap(),
             email: saved_user.email.unwrap(),
             username: saved_user.username.unwrap(),
-            token: saved_user.token.unwrap().unwrap()}))
+            token: saved_user.token.unwrap().unwrap(),
+            role_id:saved_user.role_id.unwrap().unwrap_or_default(),
+            // NOTE double unwraps returns undefined here
+            created_at: saved_user.created_at.unwrap().expect("created_at missing")}))
+
     }else{
         return Err(StatusCode::UNAUTHORIZED);
     }
