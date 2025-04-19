@@ -5,7 +5,7 @@ use axum::{
 };
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
-use crate::database::roles::{Entity as Roles};
+use crate::database::roles::Entity as Roles;
 use crate::database::users::{self, Entity as Users};
 
 #[derive(serde::Serialize)]
