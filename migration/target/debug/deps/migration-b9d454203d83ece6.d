@@ -1,12 +1,13 @@
-/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/libmigration-b9d454203d83ece6.rmeta: src/lib.rs src/m20250125_085443_create_users_table.rs src/m20250125_085421_create_images_table.rs src/m20250125_085500_create_contents_table.rs src/m20250125_093836_create_pages_table.rs src/m20250125_083500_create_roles_table.rs
+/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/libmigration-b9d454203d83ece6.rmeta: src/lib.rs src/m20250125_083500_create_roles_table.rs src/m20250125_085421_create_images_table.rs src/m20250125_085443_create_users_table.rs src/m20250420_204700_create_categories_table.rs src/m20250125_093836_create_pages_table.rs src/m20250125_085500_create_contents_table.rs
 
-/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/libmigration-b9d454203d83ece6.rlib: src/lib.rs src/m20250125_085443_create_users_table.rs src/m20250125_085421_create_images_table.rs src/m20250125_085500_create_contents_table.rs src/m20250125_093836_create_pages_table.rs src/m20250125_083500_create_roles_table.rs
+/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/libmigration-b9d454203d83ece6.rlib: src/lib.rs src/m20250125_083500_create_roles_table.rs src/m20250125_085421_create_images_table.rs src/m20250125_085443_create_users_table.rs src/m20250420_204700_create_categories_table.rs src/m20250125_093836_create_pages_table.rs src/m20250125_085500_create_contents_table.rs
 
-/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/migration-b9d454203d83ece6.d: src/lib.rs src/m20250125_085443_create_users_table.rs src/m20250125_085421_create_images_table.rs src/m20250125_085500_create_contents_table.rs src/m20250125_093836_create_pages_table.rs src/m20250125_083500_create_roles_table.rs
+/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/migration-b9d454203d83ece6.d: src/lib.rs src/m20250125_083500_create_roles_table.rs src/m20250125_085421_create_images_table.rs src/m20250125_085443_create_users_table.rs src/m20250420_204700_create_categories_table.rs src/m20250125_093836_create_pages_table.rs src/m20250125_085500_create_contents_table.rs
 
 src/lib.rs:
-src/m20250125_085443_create_users_table.rs:
-src/m20250125_085421_create_images_table.rs:
-src/m20250125_085500_create_contents_table.rs:
-src/m20250125_093836_create_pages_table.rs:
 src/m20250125_083500_create_roles_table.rs:
+src/m20250125_085421_create_images_table.rs:
+src/m20250125_085443_create_users_table.rs:
+src/m20250420_204700_create_categories_table.rs:
+src/m20250125_093836_create_pages_table.rs:
+src/m20250125_085500_create_contents_table.rs:
