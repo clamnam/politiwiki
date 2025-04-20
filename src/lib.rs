@@ -8,8 +8,12 @@ use std::net::SocketAddr;
 use tower_http::cors::CorsLayer;
 use http::{Method, header,HeaderValue};
 use std::env;
+mod tests;
+
 
 pub async fn run(database_url: &str) {
+
+    
     let database = Database::connect(database_url).await.unwrap();
     
     // Create a CORS layer that will apply to all routes

@@ -21,3 +21,11 @@ bcrypt = "0.17.0"
 jsonwebtoken = "9.3.1"
 json = "0.12.4"
 serde_json = "1.0.140"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full", "test-util"] }
+tower = { version = "0.4", features = ["util"] }
+hyper = "0.14"
+serde_json = "1.0"
+
+

@@ -2,7 +2,6 @@
 use politiwiki::run;
 use dotenvy::dotenv;
 use std::env;
-
 #[tokio::main]
 pub async fn main() {
     dotenv().ok();
