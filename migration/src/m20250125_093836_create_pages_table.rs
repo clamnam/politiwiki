@@ -18,7 +18,7 @@ use sea_orm_migration::prelude::*;
                                 .primary_key(),
                         )
 
-                        .col(ColumnDef::new(Pages::Title).string().not_null())
+                        .col(ColumnDef::new(Pages::Title).string().unique_key().not_null())
                         .col(ColumnDef::new(Pages::Category).integer())
 
                         .col(ColumnDef::new(Pages::CreatedAt).date_time())

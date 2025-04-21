@@ -12,7 +12,7 @@ use json;
 pub struct RequestPage{
     pub title: String,
     pub created_at: Option<DateTime>,
-    pub page_type: i32,
+    pub category: i32,
     pub history: Option<String>,
 }
 
@@ -31,7 +31,7 @@ pub async fn partial_update_page(
         title: Set(request_page.title),
         created_at: Set(request_page.created_at),
         updated_at: Set(Some(Utc::now().naive_utc())),
-        page_type: Set(Some(request_page.page_type)),
+        category: Set(Some(request_page.category)),
         history: Set(Some(sea_orm::JsonValue::String(history))),
     };
 

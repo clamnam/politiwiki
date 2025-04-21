@@ -9,14 +9,22 @@ impl MigrationTrait for Migration {
 
 
         manager
-            .create_table(
-                Table::create()
-                    .table(Categories::Table)
-                    .if_not_exists()
-                    .col(pk_auto(Categories::Id))
-                    .col(string(Categories::Name).not_null())
-                    .to_owned(),
-            )
+        .create_table(
+            Table::create()
+                .table(Categories::Table)
+                .if_not_exists()
+                .col(
+                    ColumnDef::new(Categories::Id)
+                        .integer()
+                        .not_null()
+                        .auto_increment()
+                        .primary_key(),
+                )
+
+                .col(ColumnDef::new(Categories::Name).string().unique_key().not_null())
+
+                .to_owned(),
+        )
             .await
     }
 
