@@ -64,7 +64,7 @@ pub async fn create_content(
     };
 
     // Process queue field by creating a JSON representation of all fields
-    let queue_entry = serde_json::json!({
+    let queue_entry = serde_json::json!({//stopped identifying json macro directly>?
         "title": request_content.title,
         "content_type": request_content.content_type,
         "content_body": request_content.content_body,
@@ -79,9 +79,8 @@ pub async fn create_content(
         "created_at": Utc::now().naive_utc().to_string()
     });
 
-    // Create an array containing the queue entry 
+    // Create an array containing the queue entry ,... siplifies
     let queue_json = Some(serde_json::json!([queue_entry]));
-
     let empty_history = Some(serde_json::json!([]));
 
     let new_contents = contents::ActiveModel {
