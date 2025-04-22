@@ -7,8 +7,9 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
+    #[sea_orm(unique)]
     pub title: String,
-    pub page_type: Option<i32>,
+    pub category: Option<i32>,
     pub created_at: Option<DateTime>,
     pub updated_at: Option<DateTime>,
     pub history: Option<Json>,
@@ -16,8 +17,22 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+    #[sea_orm(
+        belongs_to = "super::categories::Entity",
+        from = "Column::Category",
+        to = "super::categories::Column::Id",
+        on_update = "NoAction",
+        on_delete = "NoAction"
+    )]
+    Categories,
     #[sea_orm(has_many = "super::content::Entity")]
     Content,
+}
+
+impl Related<super::categories::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Categories.def()
+    }
 }
 
 impl Related<super::content::Entity> for Entity {

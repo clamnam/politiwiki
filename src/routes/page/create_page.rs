@@ -8,7 +8,7 @@ use crate::database::pages;
 #[derive(serde::Deserialize)]
 pub struct PageCreate {
     title: String,
-    page_type: i32
+    category: i32
 }
 
 #[derive(serde::Serialize)]
@@ -20,9 +20,10 @@ pub async fn create_page(
     Extension(database): Extension<DatabaseConnection>,
     Json(request_page): Json<PageCreate>
 ) -> Result<Json<PageCreateResponse>, StatusCode> {
+    
     let new_pages = pages::ActiveModel {
         title: Set(request_page.title),
-        page_type: Set(Some(request_page.page_type)),
+        category: Set(Some(request_page.category)),
         created_at: Set(Some(Utc::now().naive_utc())),
         ..Default::default()
     };

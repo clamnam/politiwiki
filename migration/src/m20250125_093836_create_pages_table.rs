@@ -18,13 +18,23 @@ use sea_orm_migration::prelude::*;
                                 .primary_key(),
                         )
 
-                        .col(ColumnDef::new(Pages::Title).string().not_null())
-                        .col(ColumnDef::new(Pages::PageType).integer())
+                        .col(ColumnDef::new(Pages::Title).string().unique_key().not_null())
+                        .col(ColumnDef::new(Pages::Category).integer())
 
                         .col(ColumnDef::new(Pages::CreatedAt).date_time())
                         .col(ColumnDef::new(Pages::UpdatedAt).date_time())
                         .col(ColumnDef::new(Pages::History).json())
 
+                        .to_owned(),
+                )
+                .await?;
+
+            manager
+                .create_foreign_key(
+                    ForeignKeyCreateStatement::new()
+                        .name("fk_page_category")
+                        .from(Pages::Table, Pages::Category) 
+                        .to(Categories::Table, Categories::Id) // But it references the "categories" table
                         .to_owned(),
                 )
                 .await?;
@@ -47,8 +57,8 @@ use sea_orm_migration::prelude::*;
         Id,
         #[sea_orm(iden = "title")]
         Title,
-        #[sea_orm(iden = "page_type")]
-        PageType,
+        #[sea_orm(iden = "category")]
+        Category,
         #[sea_orm(iden = "created_at")]
         CreatedAt,
         #[sea_orm(iden = "updated_at")]
@@ -56,5 +66,12 @@ use sea_orm_migration::prelude::*;
         #[sea_orm(iden = "history")]
         History,
     }
-    
+
+    #[derive(Iden)]
+    enum Categories {
+        #[iden = "categories"] // This is the table name (plural)
+        Table,
+        Id,
+    }
+
 

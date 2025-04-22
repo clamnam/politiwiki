@@ -1,4 +1,3 @@
-// filepath: /Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/src/main.rs
 use politiwiki::run;
 use dotenvy::dotenv;
 use std::env;

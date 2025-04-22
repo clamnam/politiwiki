@@ -9,8 +9,6 @@ use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, Qu
 use crate::database::sea_orm_active_enums;
 use crate::database::users::{self, Entity as Users};
 
-use serde_json::json; // Add this import
-
 use crate::database::{content as contents, images};
 #[derive(serde::Deserialize)]
 pub enum StatusValues {
@@ -66,7 +64,7 @@ pub async fn create_content(
     };
 
     // Process queue field by creating a JSON representation of all fields
-    let queue_entry = json!({
+    let queue_entry = serde_json::json!({
         "title": request_content.title,
         "content_type": request_content.content_type,
         "content_body": request_content.content_body,
@@ -80,13 +78,11 @@ pub async fn create_content(
         "is_hidden": false,
         "created_at": Utc::now().naive_utc().to_string()
     });
-    // Create an array containing the queue entry
-    let queue_json = Some(json!([queue_entry]));
-    let empty_history: json::JsonValue = json::JsonValue::new_array();
-    let empty_history_json_string = empty_history.dump();
-    let empty_history_serde_json: serde_json::Value = serde_json::from_str(&empty_history_json_string)
-        .unwrap_or(serde_json::Value::Array(vec![]));
-    
+
+    // Create an array containing the queue entry 
+    let queue_json = Some(serde_json::json!([queue_entry]));
+
+    let empty_history = Some(serde_json::json!([]));
 
     let new_contents = contents::ActiveModel {
         title: Set(request_content.title),
@@ -99,7 +95,7 @@ pub async fn create_content(
         order_id: Set(Some(request_content.order_id)),
         page_id: Set(checked_page_id.unwrap_or_default()),
         queue: Set(queue_json),
-        history: Set(Some(empty_history_serde_json)),
+        history: Set(empty_history),
         is_deleted: Set(false),
         is_hidden: Set(false),
         created_at: Set(Utc::now().naive_utc()),

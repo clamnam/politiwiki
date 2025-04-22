@@ -2,6 +2,7 @@
 
 pub mod prelude;
 
+pub mod categories;
 pub mod content;
 pub mod images;
 pub mod pages;
