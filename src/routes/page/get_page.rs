@@ -7,7 +7,7 @@ pub struct ResponsePage {
     title: String,
     created_at: String,
     updated_at: String,
-    page_type: i32,
+    category: i32,
     
 }
 
@@ -24,7 +24,7 @@ pub async fn get_single_page(Path(page_id): Path<i32>, Extension(database): Exte
             title: page.title,
             created_at: page.created_at.unwrap_or_default().to_string(),
             updated_at: page.updated_at.unwrap_or_default().to_string(),
-            page_type: page.page_type.unwrap_or_default(),
+            category: page.category.unwrap_or_default(),
         }))
     } else {
         Err(StatusCode::NOT_FOUND)
@@ -58,7 +58,7 @@ pub async fn get_all_page(Extension(database): Extension<DatabaseConnection>, Qu
         title: db_page.title,
         created_at: db_page.created_at.unwrap_or_default().to_string(),
         updated_at: db_page.updated_at.unwrap_or_default().to_string(),
-        page_type: db_page.page_type.unwrap_or_default(),
+        category: db_page.category.unwrap_or_default(),
     })
     .collect();
 
