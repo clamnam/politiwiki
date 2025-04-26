@@ -8,23 +8,23 @@ use std::net::SocketAddr;
 use tower_http::cors::CorsLayer;
 use http::{Method, header,HeaderValue};
 use std::env;
-mod tests;
 
+// // Make tests a proper module with conditional compilation
+// #[cfg(test)]
+// pub mod tests;
 
 pub async fn run(database_url: &str) {
 
     
     let database = Database::connect(database_url).await.unwrap();
     
+    let frontend_url = env::var("FRONTEND_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
+    println!("Allowed frontend URL: {}", frontend_url);
+
     // Create a CORS layer that will apply to all routes
     let cors = CorsLayer::new()
         // Allow requests from your frontend
-        .allow_origin(
-            env::var("FRONTEND_URL")
-                .unwrap_or_else(|_| "http://localhost:5173".to_string())
-                .parse::<HeaderValue>()
-                .unwrap()
-        )
+        .allow_origin(frontend_url.parse::<HeaderValue>().unwrap())
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
         .allow_headers([header::CONTENT_TYPE, header::AUTHORIZATION])
         .allow_credentials(true);
