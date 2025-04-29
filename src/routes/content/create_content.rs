@@ -30,10 +30,8 @@ pub struct RequestContent {
 
 }
 
-pub async fn create_content(
-    authorization: TypedHeader<Authorization<Bearer>>,
-    Extension(database): Extension<DatabaseConnection>,
-    Json(request_content): Json<RequestContent>,
+
+pub async fn create_content(authorization: TypedHeader<Authorization<Bearer>>, Extension(database): Extension<DatabaseConnection>, Json(request_content): Json<RequestContent>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let token: &str = authorization.token();
     let user = match Users::find()

@@ -9,6 +9,7 @@ mod role;
 
 // use tower_http::trace::{self, TraceLayer};
 // use tracing::Level;
+
 //user
 use user::user::{login, register,logout};
 //content
@@ -16,17 +17,17 @@ use content::{create_content::create_content, get_content::{get_all_content, get
 use admin::{approve_content::approve_content, category::{create_category::create_category, delete_category::delete_category, get_category::get_all_categories}};
 //page
 use page::{create_page::create_page, get_page::{get_all_page, get_single_page}, update_page::atomic_update_page,partial_update_page::partial_update_page};
-
-use image::{create_image::create_image, get_image::{get_all_image, get_single_image}, update_image::atomic_update_image,partial_update_image::partial_update_image};
-
+//image
+use image::{create_image::create_image, get_image::get_single_image, update_image::atomic_update_image,partial_update_image::partial_update_image};
+//role
 use role::get_role::get_role;
-
+//authguard
 use custom_middleware::authguard::authguard;
 
 use sea_orm::DatabaseConnection;
 
 pub fn create_routes(database: DatabaseConnection) -> Router<Body> {
-    // Define routes that require authentication
+    // Routes that require authentication
     let auth_routes = Router::new()
         .route("/logout", post(logout))
         .route("/image", post(create_image))
@@ -46,7 +47,7 @@ pub fn create_routes(database: DatabaseConnection) -> Router<Body> {
         .route("/image/:id", patch(partial_update_image))
         .layer(middleware::from_fn(authguard));
 
-    // Define public routes
+    //  public routes
     let public_routes = Router::new()
         .route("/content/:id", get(get_single_content))
 
@@ -58,7 +59,6 @@ pub fn create_routes(database: DatabaseConnection) -> Router<Body> {
         .route("/login", post(login))
         .route("/page", get(get_all_page))
         .route("/page/:id", get(get_single_page))
-        .route("/image", get(get_all_image))
         .route("/image/:id", get(get_single_image));
 
     // Combine routes and add database extension
