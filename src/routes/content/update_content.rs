@@ -37,7 +37,9 @@ pub async fn queue_partial_update_content(
     Extension(database): Extension<DatabaseConnection>,
     Json(request_content): Json<RequestContent>
 ) -> impl IntoResponse {
+
     let token: &str = authorization.token();
+
     let user = match Users::find()
         .filter(users::Column::Token.eq(Some(token)))
         .one(&database)
@@ -107,7 +109,7 @@ pub async fn queue_partial_update_content(
         id: Set(id),
         title: Set(current.title),
         created_at: Set(current.created_at),
-        updated_at: Set(Some(Utc::now().naive_utc())),
+        updated_at: Set(current.updated_at),
         content_type: Set(current.content_type),
         content_body: Set(current.content_body),
         images_id: Set(current.images_id),
