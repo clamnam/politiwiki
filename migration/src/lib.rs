@@ -6,7 +6,6 @@ mod m20250125_085443_create_users_table;
 mod m20250420_204700_create_categories_table;
 mod m20250125_093836_create_pages_table;
 mod m20250125_085500_create_contents_table;
-mod m20250428_133436_seed_admin_user;
 
 pub struct Migrator;
 
@@ -21,7 +20,6 @@ impl MigratorTrait for Migrator {
             Box::new(m20250420_204700_create_categories_table::Migration),
             Box::new(m20250125_093836_create_pages_table::Migration),
             Box::new(m20250125_085500_create_contents_table::Migration),
-            Box::new(m20250428_133436_seed_admin_user::Migration),
 
         ]
     }

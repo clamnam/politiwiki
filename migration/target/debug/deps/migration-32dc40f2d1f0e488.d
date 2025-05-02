@@ -1,8 +1,8 @@
-/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/libmigration-32dc40f2d1f0e488.rmeta: src/lib.rs src/m20250125_083500_create_roles_table.rs src/m20250125_085421_create_images_table.rs src/m20250125_085443_create_users_table.rs src/m20250420_204700_create_categories_table.rs src/m20250125_093836_create_pages_table.rs src/m20250125_085500_create_contents_table.rs src/m20250428_133436_seed_admin_user.rs
+/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/libmigration-32dc40f2d1f0e488.rmeta: src/lib.rs src/m20250125_083500_create_roles_table.rs src/m20250125_085421_create_images_table.rs src/m20250125_085443_create_users_table.rs src/m20250420_204700_create_categories_table.rs src/m20250125_093836_create_pages_table.rs src/m20250125_085500_create_contents_table.rs
 
-/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/libmigration-32dc40f2d1f0e488.rlib: src/lib.rs src/m20250125_083500_create_roles_table.rs src/m20250125_085421_create_images_table.rs src/m20250125_085443_create_users_table.rs src/m20250420_204700_create_categories_table.rs src/m20250125_093836_create_pages_table.rs src/m20250125_085500_create_contents_table.rs src/m20250428_133436_seed_admin_user.rs
+/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/libmigration-32dc40f2d1f0e488.rlib: src/lib.rs src/m20250125_083500_create_roles_table.rs src/m20250125_085421_create_images_table.rs src/m20250125_085443_create_users_table.rs src/m20250420_204700_create_categories_table.rs src/m20250125_093836_create_pages_table.rs src/m20250125_085500_create_contents_table.rs
 
-/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/migration-32dc40f2d1f0e488.d: src/lib.rs src/m20250125_083500_create_roles_table.rs src/m20250125_085421_create_images_table.rs src/m20250125_085443_create_users_table.rs src/m20250420_204700_create_categories_table.rs src/m20250125_093836_create_pages_table.rs src/m20250125_085500_create_contents_table.rs src/m20250428_133436_seed_admin_user.rs
+/Users/jackmoloneyobrien/Desktop/College/Major Project/PolitiWiki/migration/target/debug/deps/migration-32dc40f2d1f0e488.d: src/lib.rs src/m20250125_083500_create_roles_table.rs src/m20250125_085421_create_images_table.rs src/m20250125_085443_create_users_table.rs src/m20250420_204700_create_categories_table.rs src/m20250125_093836_create_pages_table.rs src/m20250125_085500_create_contents_table.rs
 
 src/lib.rs:
 src/m20250125_083500_create_roles_table.rs:
@@ -11,4 +11,3 @@ src/m20250125_085443_create_users_table.rs:
 src/m20250420_204700_create_categories_table.rs:
 src/m20250125_093836_create_pages_table.rs:
 src/m20250125_085500_create_contents_table.rs:
-src/m20250428_133436_seed_admin_user.rs:
