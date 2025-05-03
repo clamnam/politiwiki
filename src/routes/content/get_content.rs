@@ -36,8 +36,7 @@ pub struct ResponseContent {
     page_id: i32,
     created_at: Option<chrono::NaiveDateTime>,
     updated_at: Option<chrono::NaiveDateTime>,
-    status: Option<StatusValues>,  // Changed from sea_orm_active_enums::Status to StatusValues
-
+    status: Option<StatusValues>,  // Changed from sea_orm enums to StatusValues
     is_hidden: Option<bool>,
     is_deleted: Option<bool>,
     queue: Option<String>,
@@ -46,7 +45,10 @@ pub struct ResponseContent {
 }
 
 pub async fn get_single_content(Path(content_id): Path<i32>, Extension(database): Extension<DatabaseConnection>) -> Result<Json<ResponseContent>, StatusCode> {
-    let content_result: Option<crate::database::content::Model> = Contents::find_by_id(content_id).one(&database).await.unwrap();
+    let content_result: Option<crate::database::content::Model> = Contents::find_by_id(content_id)
+    .one(&database)
+    .await
+    .map_err(|_err| StatusCode::INTERNAL_SERVER_ERROR)?;
     
     if let Some(content) = content_result {
         // Now access queue from the unwrapped content
@@ -112,22 +114,8 @@ pub async fn get_content_by_page(Path(page_id): Path<i32>, Extension(database): 
 
 pub async fn get_all_content(
     Extension(database): Extension<DatabaseConnection>,
-    // Query(query_params): Query<GetContentQueryParams>
     ) -> Result<Json<Vec<ResponseContent>>, StatusCode> {
-    // dbg!(query_params.content_url.to_owned());
 
-    // let mut content_url_filter = Condition::all();
-    // if let Some(content_url) = query_params.content_url {
-    //     content_url_filter = if !content_url.is_empty() {
-    //         dbg!("content_url is not empty");
-    //     content_url_filter.add(contents::Column::contentUrl.eq(content_url))
-    //     } else {
-    //         dbg!("content_url is empty");
-    //         content_url_filter.add(contents::Column::contentUrl.is_null())
-
-    //     }
-
-    // }
 
     
     let contents = Contents::find()

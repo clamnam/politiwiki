@@ -10,11 +10,20 @@ pub fn role_augment(current_role: f32, positive: bool) -> f32 {
 }
 
 fn augment(x: f32, positive: bool) -> f32 {
-    let e = std::f32::consts::E;
-    let delta = e.powf(-x) / (e.powf(-x) + 1.0) / 14.0;
-    if positive {
-        x + delta
-    } else {
-        x - delta
+        // Get Euler's number
+        let e = std::f32::consts::E;
+        
+        // Calculate base adjustment using a sigmoid-like function
+        // This creates a gradually diminishing effect as x increases
+        let base_delta = e.powf(-x) / (e.powf(-x) + 1.0) / 1.0;
+        
+        // Scale the delta proportionally to distance from 1.0
+        let scaled_delta = (1.0 - x) * base_delta; 
+        
+        //increase or decrease the value based on the positive bool
+        if positive {
+            x + scaled_delta  
+        } else {
+            x - scaled_delta 
+        }
     }
-}

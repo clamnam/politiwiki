@@ -1,4 +1,3 @@
-
 use crate::database::content::{self, Entity as Contents};
 use crate::database::roles::{self, Entity as Role};
 
@@ -28,45 +27,47 @@ pub struct RequestContent {
     approval: bool,
     queue_index: usize,          // Index of the queue item to approve
     modified_by_id: Option<i32>, // Who is approving the content
+    content_id: Option<i32>,     // Add this field to receive the content ID
 }
 
 pub async fn approve_content(
     authorization: TypedHeader<Authorization<Bearer>>,
-    Path(id): Path<i32>,
+    Path(_id): Path<i32>,
     Extension(database): Extension<DatabaseConnection>,
     Json(request_content): Json<RequestContent>,
 ) -> impl IntoResponse {
     // 1. Get user token
     let token = authorization.token();
-    // 2. find user based on token
 
+    // 2. Find user based on token
     let user = match find_user(token, &database).await {
         Ok(user) => user,
         Err(status) => return status,
     };
+
     // 3. Get the user's role
     let role = match find_role(&database, user).await {
         Ok(role) => role,
         Err(status) => return status,
     };
 
-    // 4. Check if role is at least 5, admin threshold
+    // 4. Check if role is at least 0.5, admin threshold
     if role.title < 0.5 {
         return StatusCode::UNAUTHORIZED;
     }
 
-    //5. find the page
-    let page = match find_page(&database, id).await {
-        Ok(page) => page,
-        Err(status) => return status,
+    // 6. Find the content for this page
+    let content_id = match request_content.content_id {
+        Some(id) => id,
+        None => return StatusCode::BAD_REQUEST, // Handle missing content_id
     };
 
-    let current_content = match find_content(&database, id, page).await {
+    let current_content = match find_content(&database, content_id).await {
         Ok(contents) => contents,
         Err(status) => return status,
     };
 
-    // 3. Parse the queue from the content
+    // 7. Parse the queue from the content
     let queue_json_str = match &current_content.queue {
         Some(queue) => queue.to_string(),
         None => return StatusCode::BAD_REQUEST, // No queue exists
@@ -77,20 +78,37 @@ pub async fn approve_content(
         _ => return StatusCode::BAD_REQUEST,
     };
 
-    // 4. Check if the requested queue index exists
+    // 8. Check if the requested queue index exists
     if request_content.queue_index >= queue_parsed.len() {
         return StatusCode::BAD_REQUEST;
     }
-    // 5. Get the queue item to be approved
+
+    // 9. Get the queue item to be approved
     let queue_item = queue_parsed[request_content.queue_index].to_owned();
-    dbg!(&request_content);
-    // Branch based on approval decision
-    if &request_content.approval == &true  {
+
+    // 10. case based on approval decision
+    if &request_content.approval == &true {
         dbg!("approving");
-        process_approval(&current_content, &queue_item, &queue_parsed, &request_content, role, &database).await
+        process_approval(
+            &current_content,
+            &queue_item,
+            &queue_parsed,
+            &request_content,
+            role,
+            &database,
+        )
+        .await
     } else {
         dbg!("denying");
-        process_denial(&current_content, &queue_item, &queue_parsed, &request_content, role, &database).await
+        process_denial(
+            &current_content,
+            &queue_item,
+            &queue_parsed,
+            &request_content,
+            role,
+            &database,
+        )
+        .await
     }
 }
 
@@ -101,10 +119,10 @@ async fn process_approval(
     request_content: &RequestContent,
     role: roles::Model,
     database: &DatabaseConnection,
-) -> StatusCode {  // Changed return type from impl IntoResponse to StatusCode
+) -> StatusCode {
     let content_id = current_content.id;
 
-    // 6. Create a history entry for the current state
+    // 1. Create a history entry for the current state
     let history_entry = json::object! {
         "title": current_content.title.clone(),
         "content_type": current_content.content_type,
@@ -126,7 +144,7 @@ async fn process_approval(
         "overwritten_at": Utc::now().naive_utc().to_string()
     };
 
-    // 7. Prepare history JSON
+    // 2. Prepare history JSON
     let mut history_array = json::JsonValue::new_array();
     if let Some(history) = &current_content.history {
         // Parse existing history
@@ -145,19 +163,19 @@ async fn process_approval(
     let history_serde_json: serde_json::Value =
         serde_json::from_str(&history_json_string).unwrap_or(serde_json::Value::Array(vec![]));
 
-    // 8. Create a new queue with the approved item removed
+    // 3. Create a new queue with the approved item removed
     let mut new_queue = json::JsonValue::new_array();
     for (index, item) in queue_parsed.members().enumerate() {
         if index != request_content.queue_index {
             new_queue.push(item.clone()).unwrap_or(());
         }
     }
-
+    dbg!(queue_item);
     let queue_json_string = new_queue.dump();
     let queue_serde_json: serde_json::Value =
         serde_json::from_str(&queue_json_string).unwrap_or(serde_json::Value::Array(vec![]));
 
-    // 9. Update the content with approved changes
+    // 4. Update the content with approved changes
     let update_content = content::ActiveModel {
         id: Set(content_id), // Use the correct content ID instead of page ID
         title: Set(queue_item["title"].as_str().unwrap_or_default().to_owned()),
@@ -187,9 +205,9 @@ async fn process_approval(
         queue: Set(Some(queue_serde_json)),
     };
 
-    // 10. Save to database
+    // 5. Save to database
     match Contents::update(update_content)
-        .filter(content::Column::Id.eq(content_id)) // Filter by content ID, not page ID
+        .filter(content::Column::Id.eq(content_id))
         .exec(database)
         .await
     {
@@ -199,9 +217,10 @@ async fn process_approval(
             return StatusCode::INTERNAL_SERVER_ERROR;
         }
     };
-    
+
+    // 6. Update user role title based on approval
     let update_role_title = role_augment(role.title, true);
-    
+
     let update_role = roles::ActiveModel {
         id: Set(role.id),
         title: Set(update_role_title),
@@ -218,15 +237,15 @@ async fn process_approval(
 
 async fn process_denial(
     current_content: &content::Model,
-    queue_item: &JsonValue, 
+    queue_item: &JsonValue,
     queue_parsed: &JsonValue,
     request_content: &RequestContent,
     role: roles::Model,
-    database: &DatabaseConnection
-) -> StatusCode {  // Changed return type from impl IntoResponse to StatusCode
+    database: &DatabaseConnection,
+) -> StatusCode {
     let content_id = current_content.id;
 
-    // on denial history takes queue item instead
+    // 1. Create history entry from queue item (for rejected content)
     let history_entry = json::object! {
         "title": queue_item["title"].clone(),
         "content_type": queue_item["content_type"].clone(),
@@ -241,8 +260,8 @@ async fn process_denial(
         "is_hidden": queue_item["is_hidden"].clone(),
         "updated_at": queue_item["updated_at"].clone(),
     };
-    
-    // 7. Prepare history JSON
+
+    // 2. Prepare history JSON
     let mut history_array = json::JsonValue::new_array();
     if let Some(history) = &current_content.history {
         // Parse existing history
@@ -252,7 +271,7 @@ async fn process_denial(
             }
         }
     }
-    
+
     // Add new history entry
     history_array.push(history_entry).unwrap_or(());
 
@@ -260,8 +279,8 @@ async fn process_denial(
     let history_json_string = history_array.dump();
     let history_serde_json: serde_json::Value =
         serde_json::from_str(&history_json_string).unwrap_or(serde_json::Value::Array(vec![]));
-    
-    // 8. Create a new queue with the denied item removed
+
+    // 3. Create a new queue with the denied item removed
     let mut new_queue = json::JsonValue::new_array();
 
     for (index, item) in queue_parsed.members().enumerate() {
@@ -269,7 +288,7 @@ async fn process_denial(
             new_queue.push(item.clone()).unwrap_or(());
         }
     }
-    
+
     let queue_json_string = new_queue.dump();
     let queue_serde_json: serde_json::Value =
         serde_json::from_str(&queue_json_string).unwrap_or(serde_json::Value::Array(vec![]));
@@ -293,9 +312,9 @@ async fn process_denial(
         queue: Set(Some(queue_serde_json)),
     };
 
-    // 10. Save to database
+    // 5. Save to database
     match Contents::update(update_content)
-        .filter(content::Column::Id.eq(content_id)) // Filter by content ID, not page ID
+        .filter(content::Column::Id.eq(content_id))
         .exec(database)
         .await
     {
@@ -305,7 +324,8 @@ async fn process_denial(
             return StatusCode::INTERNAL_SERVER_ERROR;
         }
     };
-    
+
+    // 6. Update user role title based on denial
     let update_role_title = role_augment(role.title, false);
 
     let update_role = roles::ActiveModel {
@@ -346,26 +366,19 @@ async fn find_role(database: &DatabaseConnection, user: Model) -> Result<roles::
     };
     role
 }
-async fn find_page(database: &DatabaseConnection, id: i32) -> Result<pages::Model, StatusCode> {
-    let page = match Pages::find_by_id(id).one(database).await {
-        Ok(Some(role)) => Ok(role),
-        Ok(None) => Err(StatusCode::UNAUTHORIZED),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
-    };
-    page
-}
 
-async fn find_content(database: &DatabaseConnection, id: i32, page: pages::Model) -> Result<content::Model, StatusCode> {
-    match page
-        .find_related(Contents)
-        .filter(content::Column::PageId.eq(id))
-        // Check that the 'queue' JSON array has at least one element
+
+async fn find_content(
+    database: &DatabaseConnection,
+    content_id: i32,
+) -> Result<content::Model, StatusCode> {
+    match Contents::find_by_id(content_id)
         .filter(Expr::cust("json_array_length(queue) > 0"))
         .one(database)
         .await
     {
         Ok(Some(content)) => Ok(content),
-        Ok(None) => Err(StatusCode::UNAUTHORIZED),
+        Ok(None) => Err(StatusCode::NOT_FOUND),
         Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
     }
 }
