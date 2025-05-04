@@ -1,5 +1,11 @@
 FROM rust:latest
 
+# Add these flags to reduce memory usage
+ENV RUSTFLAGS="-C codegen-units=1"
+
+# Limit the number of parallel compilation jobs
+ENV CARGO_BUILD_JOBS=1
+
 WORKDIR /app
 
 # Install cargo-watch for hot reloading
@@ -10,4 +16,5 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["cargo", "run","--release"]
+CMD ["cargo", "watch", "-x", "run"]
+
