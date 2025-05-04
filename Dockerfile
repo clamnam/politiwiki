@@ -1,20 +1,12 @@
-FROM rust:latest
-
-# Add these flags to reduce memory usage
-ENV RUSTFLAGS="-C codegen-units=1"
-
-# Limit the number of parallel compilation jobs
-ENV CARGO_BUILD_JOBS=1
-
+# Use a build stage
+FROM rust:latest as builder
 WORKDIR /app
-
-# Install cargo-watch for hot reloading
-RUN cargo install cargo-watch
-
-# Copy everything into the container
 COPY . .
+RUN cargo build --release
 
+# Use a smaller base image for final
+FROM debian:bullseye-slim
+WORKDIR /app
+COPY --from=builder /app/target/release/PolitiWiki /app/PolitiWiki
 EXPOSE 3000
-
-CMD ["cargo", "watch", "-x", "run"]
-
+CMD ["./PolitiWiki"]
