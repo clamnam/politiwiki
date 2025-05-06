@@ -5,8 +5,8 @@ use axum::http;
 use routes::create_routes;
 use sea_orm::Database;
 use std::net::SocketAddr;
-use tower_http::cors::CorsLayer;
-use http::{Method, header,HeaderValue};
+use tower_http::cors::{Any, CorsLayer};
+use http::{Method, header, HeaderValue};
 use std::env;
 
 // Make tests a proper module with conditional compilation
@@ -16,23 +16,22 @@ pub mod tests;
 pub async fn run(database_url: &str) {
     let database: sea_orm::DatabaseConnection = Database::connect(database_url).await.unwrap();
     
+    // Get the allowed frontend URL and parse it to HeaderValue
     let frontend_url = env::var("FRONTEND_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
     println!("Allowed frontend URL: {}", frontend_url);
+    let allowed_origin = HeaderValue::from_str(&frontend_url)
+        .expect("Invalid FRONTEND_URL provided");
 
-    // Create a CORS layer that will apply to all routes
+    // Use a specific allowed origin instead of Any when credentials are allowed.
     let cors = CorsLayer::new()
-        // Allow requests from your frontend
-        .allow_origin(frontend_url.parse::<HeaderValue>().unwrap())
+        .allow_origin(allowed_origin)
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
         .allow_headers([header::CONTENT_TYPE, header::AUTHORIZATION])
         .allow_credentials(true);
 
-    // Build router with routes
     let app = create_routes(database)
-        // Apply the CORS layer globally to all routes
         .layer(cors);
     
-    // Set up server
     let addr = SocketAddr::from(([0,0,0,0], 3000));
     println!("Server listening on {}", addr);
     

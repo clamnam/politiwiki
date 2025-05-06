@@ -1,4 +1,4 @@
-FROM rust:latest
+FROM debian:bullseye-slim
 
 # Add these flags to reduce memory usage
 ENV RUSTFLAGS="-C codegen-units=1"
@@ -7,6 +7,9 @@ ENV RUSTFLAGS="-C codegen-units=1"
 ENV CARGO_BUILD_JOBS=1
 
 WORKDIR /app
+
+# Install required dependencies
+RUN apt-get update && apt-get install -y libssl3
 
 # Install cargo-watch for hot reloading
 RUN cargo install cargo-watch

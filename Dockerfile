@@ -1,12 +1,13 @@
-# Use a build stage
-FROM rust:latest as builder
-WORKDIR /app
-COPY . .
-RUN cargo build --release
+FROM rust:latest
 
-# Use a smaller base image for final
-FROM debian:bullseye-slim
 WORKDIR /app
-COPY --from=builder /app/target/release/PolitiWiki /app/PolitiWiki
+
+# Install cargo-watch for hot reloading
+RUN cargo install cargo-watch
+
+# Copy everything into the container
+COPY . .
+
 EXPOSE 3000
-CMD ["./PolitiWiki"]
+
+CMD ["cargo", "run","--release"]
